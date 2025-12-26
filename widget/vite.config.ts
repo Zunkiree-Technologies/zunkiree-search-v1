@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
@@ -7,15 +8,15 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify('production'),
   },
   build: {
-    lib: {
-      entry: 'src/main.tsx',
-      name: 'ZunkireeWidget',
-      fileName: 'zunkiree-widget',
-      formats: ['iife'],
-    },
+    outDir: 'dist',
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+      },
       output: {
-        extend: true,
+        entryFileNames: 'zunkiree-widget.iife.js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name][extname]',
       },
     },
     cssCodeSplit: false,
