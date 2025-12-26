@@ -13,8 +13,12 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     # Startup
     print("Starting Zunkiree Search API...")
-    await init_db()
-    print("Database initialized.")
+    try:
+        await init_db()
+        print("Database initialized.")
+    except Exception as e:
+        print(f"Warning: Database initialization failed: {e}")
+        print("App will continue without database init - tables may already exist.")
     yield
     # Shutdown
     print("Shutting down Zunkiree Search API...")
