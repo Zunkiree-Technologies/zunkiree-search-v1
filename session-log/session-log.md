@@ -19,6 +19,13 @@ Widget successfully embedded and validated on dev-web.zunkireelabs.com
    - Floating search button appears
    - Search modal opens on click
    - UI renders correctly with ZunkireeLabs branding
+5. ✅ Created `docs/TODO.md` for project tracking:
+   - Blocked items (OpenAI credits)
+   - Next steps after blocker resolved
+   - Pilot customer roadmap
+   - Future enhancements backlog
+   - Technical debt items
+   - Quick reference (URLs, credentials, embed code)
 
 ### Current State
 - **Widget**: Live and functional (UI only)
