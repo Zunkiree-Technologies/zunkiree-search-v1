@@ -8,6 +8,7 @@ engine = create_async_engine(
     settings.database_url,
     echo=False,
     pool_pre_ping=True,
+    connect_args={"statement_cache_size": 0},  # Required for Supabase Supavisor pooler
 )
 
 async_session_maker = async_sessionmaker(
