@@ -423,8 +423,9 @@ export const styles = (primaryColor: string) => `
   /* Mobile Responsive */
   @media (max-width: 640px) {
     .zk-chat-panel {
-      margin: 0;
-      border-radius: 0;
+      margin: 0 12px;
+      border-radius: 16px 16px 0 0;
+      max-width: calc(100% - 24px);
     }
 
     .zk-chat-expanded .zk-messages-wrapper {
@@ -432,8 +433,9 @@ export const styles = (primaryColor: string) => `
     }
 
     .zk-input-bar {
-      margin: 0;
-      padding: 12px 12px 16px;
+      margin: 0 12px;
+      padding: 12px 0 16px 0;
+      max-width: calc(100% - 24px);
     }
 
     .zk-chat-panel + .zk-input-bar {
