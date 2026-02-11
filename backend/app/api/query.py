@@ -38,11 +38,29 @@ async def submit_query(
     The answer is generated using RAG (Retrieval-Augmented Generation)
     based on the customer's indexed data.
     """
-    # Validate question length
-    if len(query.question.strip()) < 3:
+    # Validate: reject empty questions
+    if not query.question or not query.question.strip():
         raise HTTPException(
             status_code=400,
-            detail={"code": "INVALID_REQUEST", "message": "Question too short"},
+            detail={"code": "EMPTY_QUESTION", "message": "Question cannot be empty"},
+        )
+
+    # Handle greeting intent before RAG
+    GREETING_WORDS = {
+        "hi", "hello", "hey", "yo",
+        "good morning", "good afternoon",
+        "good evening", "hola",
+    }
+    cleaned = query.question.lower().strip()
+    if cleaned in GREETING_WORDS:
+        return QueryResponse(
+            answer="Hi! I'm Zunkiree Search. How can I help you today?",
+            suggestions=[
+                "What does Zunkiree Labs do?",
+                "How does your AI search work?",
+                "Can you show me a demo?",
+            ],
+            sources=[],
         )
 
     # Get request metadata
