@@ -242,7 +242,7 @@
     </div>
   </div>
 
-  <div class="container">
+  <div class="container" id="adminContainer" style="display:none;">
     <div id="alerts"></div>
 
     <div class="grid">
@@ -634,7 +634,31 @@
       });
     }
 
+    // Verify admin key against backend before showing UI
+    async function verifyAdminKey() {
+      if (!ADMIN_KEY) {
+        showAlert('No admin key provided', 'error');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_URL}/api/v1/admin/jobs/zunkireelabs`, {
+          headers: { 'X-Admin-Key': ADMIN_KEY },
+        });
+        if (res.status === 401) {
+          sessionStorage.removeItem('zunkiree_admin_key');
+          showAlert('Invalid admin key', 'error');
+          setTimeout(() => location.reload(), 1500);
+          return;
+        }
+        // Key is valid — show admin UI
+        document.getElementById('adminContainer').style.display = '';
+      } catch {
+        showAlert('Cannot reach API', 'error');
+      }
+    }
+
     // Initialize
+    verifyAdminKey();
     checkApiStatus();
     setInterval(checkApiStatus, 30000);
   </script>
