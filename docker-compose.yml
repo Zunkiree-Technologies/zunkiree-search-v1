@@ -1,0 +1,27 @@
+services:
+  zunkiree-search-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zunkiree-search-api
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zunkiree-search-api.rule=Host(`api.zunkireelabs.com`)"
+      - "traefik.http.routers.zunkiree-search-api.entrypoints=websecure"
+      - "traefik.http.routers.zunkiree-search-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zunkiree-search-api.loadbalancer.server.port=8000"
+    networks:
+      - hosting
+
+networks:
+  hosting:
+    external: true

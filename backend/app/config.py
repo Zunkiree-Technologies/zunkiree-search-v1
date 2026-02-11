@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import model_validator
 from functools import lru_cache
 
 
@@ -13,6 +14,12 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str
+
+    @model_validator(mode="after")
+    def fix_database_url(self):
+        if self.database_url.startswith("postgresql://"):
+            self.database_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return self
 
     # App
     api_secret_key: str = "change-this-in-production"
