@@ -124,21 +124,37 @@ export const styles = (primaryColor: string) => `
     color: white;
   }
 
+  /* ===== Backdrop ===== */
+  .zk-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9998;
+    animation: zk-backdrop-fade 200ms ease-out both;
+  }
+
+  @keyframes zk-backdrop-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
   /* ===== Expanded Panel ===== */
   .zk-expanded-panel {
     position: fixed;
     bottom: 24px;
     left: 50%;
-    width: 720px;
-    max-height: 85vh;
+    width: min(1000px, 90%);
+    height: min(80vh, 760px);
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
     z-index: 9999;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     display: flex;
     flex-direction: column;
-    animation: zk-panel-slide-up 200ms ease both;
+    animation: zk-panel-slide-up 200ms ease-out both;
     overflow: hidden;
   }
 
@@ -153,19 +169,20 @@ export const styles = (primaryColor: string) => `
     }
   }
 
-  /* Header */
+  /* Header - 64px */
   .zk-expanded-panel__header {
     display: flex;
     align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #f3f4f6;
+    height: 64px;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     flex-shrink: 0;
   }
 
   .zk-expanded-panel__title {
     flex: 1;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     color: #111827;
   }
 
@@ -174,11 +191,12 @@ export const styles = (primaryColor: string) => `
     border: none;
     color: #9ca3af;
     cursor: pointer;
-    padding: 4px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: background 150ms, color 150ms;
   }
 
@@ -187,25 +205,46 @@ export const styles = (primaryColor: string) => `
     color: #374151;
   }
 
-  /* Suggestion Chips Section */
-  .zk-expanded-panel__chips {
+  /* Hero Section - only when no messages */
+  .zk-expanded-panel__hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+  }
+
+  .zk-expanded-panel__hero-title {
+    font-size: 30px;
+    font-weight: 600;
+    color: #111827;
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.2;
+  }
+
+  .zk-expanded-panel__hero-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 14px 20px;
-    border-bottom: 1px solid #f3f4f6;
-    flex-shrink: 0;
+    justify-content: center;
+    gap: 12px;
   }
 
   /* Conversation Area */
   .zk-expanded-panel__messages {
     flex: 1;
     overflow-y: auto;
-    padding: 16px 20px;
+    padding: 32px;
+    min-height: 0;
+  }
+
+  .zk-expanded-panel__messages-inner {
+    max-width: 720px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    min-height: 80px;
+    gap: 16px;
   }
 
   .zk-expanded-panel__messages::-webkit-scrollbar {
@@ -230,10 +269,10 @@ export const styles = (primaryColor: string) => `
     scrollbar-color: #e5e7eb transparent;
   }
 
-  /* Input Section */
+  /* Input Section - sticky bottom */
   .zk-expanded-panel__input {
-    padding: 12px 16px 14px;
-    border-top: 1px solid #f3f4f6;
+    padding: 16px 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     flex-shrink: 0;
   }
 
@@ -284,20 +323,20 @@ export const styles = (primaryColor: string) => `
   }
 
   .zk-message-content {
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.5;
+    padding: 16px 18px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.6;
   }
 
   .zk-message-user .zk-message-content {
-    background: ${primaryColor};
-    color: white;
+    background: ${primaryColor}12;
+    color: #1f2937;
     border-bottom-right-radius: 4px;
   }
 
   .zk-message-assistant .zk-message-content {
-    background: #f3f4f6;
+    background: #f8f9fa;
     color: #1f2937;
     border-bottom-left-radius: 4px;
   }
@@ -508,10 +547,6 @@ export const styles = (primaryColor: string) => `
     .zk-collapsed-bar {
       width: 90%;
     }
-
-    .zk-expanded-panel {
-      width: 90%;
-    }
   }
 
   /* ===== Responsive: Mobile ===== */
@@ -522,26 +557,32 @@ export const styles = (primaryColor: string) => `
     }
 
     .zk-expanded-panel {
-      width: calc(100% - 32px);
-      bottom: 16px;
-      max-height: 90vh;
+      width: calc(100% - 16px);
+      bottom: 8px;
+      height: calc(100vh - 16px);
       border-radius: 16px;
     }
 
     .zk-expanded-panel__header {
-      padding: 14px 16px;
+      height: 56px;
+      padding: 0 16px;
     }
 
-    .zk-expanded-panel__chips {
-      padding: 12px 16px;
+    .zk-expanded-panel__hero {
+      padding: 24px 20px;
+    }
+
+    .zk-expanded-panel__hero-title {
+      font-size: 24px;
+      margin-bottom: 20px;
     }
 
     .zk-expanded-panel__messages {
-      padding: 12px 16px;
+      padding: 20px 16px;
     }
 
     .zk-expanded-panel__input {
-      padding: 10px 12px 12px;
+      padding: 12px 16px;
     }
   }
 
@@ -554,6 +595,10 @@ export const styles = (primaryColor: string) => `
     .zk-collapsed-bar--visible {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
+    }
+
+    .zk-backdrop {
+      animation: none;
     }
 
     .zk-expanded-panel {
