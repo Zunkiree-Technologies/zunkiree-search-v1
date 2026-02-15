@@ -28,7 +28,7 @@ export const styles = (primaryColor: string) => `
   /* Card container - glassmorphic */
   .zk-collapsed-bar__card {
     position: relative;
-    background: #0a0a0a;
+    background: linear-gradient(180deg, #2067fb 0%, #000b22 140.34%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     padding: 20px;
