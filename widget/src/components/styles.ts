@@ -28,10 +28,10 @@ export const styles = (primaryColor: string) => `
   /* Card container - glassmorphic */
   .zk-collapsed-bar__card {
     position: relative;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 15, 15, 0.55);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -113,17 +113,17 @@ export const styles = (primaryColor: string) => `
     margin-top: 12px;
   }
 
-  /* Card-variant chips (on glass background) */
+  /* Card-variant chips (on dark glass background) */
   .zk-chip--card {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: rgba(0, 0, 0, 0.08);
-    color: #374151;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.85);
   }
 
   .zk-chip--card:hover {
-    background: white;
-    border-color: #eb1600;
-    color: #eb1600;
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: white;
   }
 
   /* ===== Expanded Panel ===== */
