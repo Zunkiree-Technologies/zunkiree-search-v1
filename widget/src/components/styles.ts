@@ -28,10 +28,10 @@ export const styles = (primaryColor: string) => `
   /* Card container */
   .zk-collapsed-bar__card {
     position: relative;
-    background: ${primaryColor};
+    background: linear-gradient(135deg, #eb1600 0%, #ff4532 50%, #d41200 100%);
     border-radius: 20px;
     padding: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(235, 22, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   /* Minimize button - top right */
@@ -66,6 +66,7 @@ export const styles = (primaryColor: string) => `
   }
 
   .zk-collapsed-bar__input-inner {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -73,6 +74,57 @@ export const styles = (primaryColor: string) => `
     padding: 0 8px 0 14px;
     background: white;
     border-radius: 12px;
+    isolation: isolate;
+  }
+
+  .zk-collapsed-bar__input-inner::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: 13.5px;
+    padding: 1.5px;
+    background: conic-gradient(
+      from var(--border-angle),
+      transparent 0%,
+      transparent 6%,
+      #3b82f6 8%,
+      #06b6d4 10%,
+      #84cc16 12%,
+      #eab308 14%,
+      transparent 16%,
+      transparent 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: rotate-border 4s linear infinite;
+  }
+
+  .zk-collapsed-bar__input-inner::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 15px;
+    background: conic-gradient(
+      from var(--border-angle),
+      transparent 0%,
+      transparent 6%,
+      #3b82f6 8%,
+      #06b6d4 10%,
+      #84cc16 12%,
+      #eab308 14%,
+      transparent 16%,
+      transparent 100%
+    );
+    filter: blur(6px);
+    opacity: 0.5;
+    z-index: -1;
+    animation: rotate-border 4s linear infinite;
   }
 
   .zk-collapsed-bar__input-inner:hover {
@@ -95,7 +147,7 @@ export const styles = (primaryColor: string) => `
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: ${primaryColor};
+    background: #eb1600;
     color: white;
     display: flex;
     align-items: center;
