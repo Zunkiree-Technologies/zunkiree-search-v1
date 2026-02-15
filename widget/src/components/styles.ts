@@ -18,9 +18,6 @@ export const styles = (primaryColor: string) => `
     z-index: 9999;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transition: transform 180ms ease-out, opacity 180ms ease-out;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
 
   .zk-collapsed-bar--visible {
@@ -28,79 +25,57 @@ export const styles = (primaryColor: string) => `
     opacity: 1;
   }
 
-  /* Gradient border wrapper */
-  .zk-collapsed-bar__border {
+  /* Card container */
+  .zk-collapsed-bar__card {
     position: relative;
-    width: 100%;
-    background: #e5e7eb;
-    border-radius: 999px;
-    padding: 1.5px;
-    isolation: isolate;
+    background: ${primaryColor};
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Minimize button - top right */
+  .zk-collapsed-bar__minimize {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background 150ms, color 150ms, transform 150ms;
+    z-index: 1;
+  }
+
+  .zk-collapsed-bar__minimize:hover {
+    background: #f3f4f6;
+    color: #374151;
+    transform: scale(1.05);
+  }
+
+  /* Input wrapper */
+  .zk-collapsed-bar__input-wrap {
     cursor: pointer;
   }
 
-  .zk-collapsed-bar__border::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 999px;
-    padding: 1.5px;
-    background: conic-gradient(
-      from var(--border-angle),
-      transparent 0%,
-      transparent 6%,
-      #3b82f6 8%,
-      #06b6d4 10%,
-      #84cc16 12%,
-      #eab308 14%,
-      transparent 16%,
-      transparent 100%
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    animation: rotate-border 4s linear infinite;
-  }
-
-  .zk-collapsed-bar__border::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 999px;
-    background: conic-gradient(
-      from var(--border-angle),
-      transparent 0%,
-      transparent 6%,
-      #3b82f6 8%,
-      #06b6d4 10%,
-      #84cc16 12%,
-      #eab308 14%,
-      transparent 16%,
-      transparent 100%
-    );
-    filter: blur(6px);
-    opacity: 0.4;
-    z-index: -1;
-    animation: rotate-border 4s linear infinite;
-  }
-
-  .zk-collapsed-bar__inner {
+  .zk-collapsed-bar__input-inner {
     display: flex;
     align-items: center;
-    gap: 12px;
-    height: 64px;
-    padding: 0 24px;
+    gap: 10px;
+    height: 48px;
+    padding: 0 8px 0 14px;
     background: white;
-    border-radius: 999px;
-    position: relative;
+    border-radius: 12px;
   }
 
-  .zk-collapsed-bar__border:hover .zk-collapsed-bar__inner {
+  .zk-collapsed-bar__input-inner:hover {
     background: #fafafa;
   }
 
@@ -111,17 +86,42 @@ export const styles = (primaryColor: string) => `
 
   .zk-collapsed-bar__placeholder {
     flex: 1;
-    font-size: 15px;
+    font-size: 14px;
     color: #9ca3af;
     user-select: none;
   }
 
+  .zk-collapsed-bar__send {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: ${primaryColor};
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Chips inside card */
   .zk-collapsed-bar__chips {
     display: flex;
-    justify-content: center;
+    flex-wrap: wrap;
     gap: 8px;
-    margin-top: 10px;
-    opacity: 0.85;
+    margin-top: 12px;
+  }
+
+  /* Card-variant chips (on colored background) */
+  .zk-chip--card {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: white;
+  }
+
+  .zk-chip--card:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
   }
 
   /* ===== Expanded Panel ===== */
@@ -566,8 +566,6 @@ export const styles = (primaryColor: string) => `
       animation: none;
     }
 
-    .zk-collapsed-bar__border::before,
-    .zk-collapsed-bar__border::after,
     .zk-input-container::before,
     .zk-input-container::after {
       animation: none;
