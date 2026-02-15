@@ -8,16 +8,6 @@ export const styles = (primaryColor: string) => `
     padding: 0;
   }
 
-  /* ===== Dock Mode: pure fixed overlay, zero host modifications ===== */
-  #zunkiree-widget-root.zk-docked-mode {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 420px;
-    height: 100vh;
-    z-index: 2147483000;
-  }
-
   /* ===== Collapsed Bar ===== */
   .zk-collapsed-bar {
     position: fixed;
