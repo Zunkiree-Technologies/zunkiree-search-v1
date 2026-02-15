@@ -1,116 +1,267 @@
 export const styles = (primaryColor: string) => `
-  /* Widget Container */
-  .zk-widget {
+  /* ===== Reset ===== */
+  .zk-collapsed-bar *,
+  .zk-expanded-panel * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ===== Collapsed Bar ===== */
+  .zk-collapsed-bar {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+    width: 720px;
+    z-index: 9999;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: transform 180ms ease-out, opacity 180ms ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .zk-collapsed-bar--visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* Gradient border wrapper */
+  .zk-collapsed-bar__border {
+    position: relative;
+    width: 100%;
+    background: #e5e7eb;
+    border-radius: 999px;
+    padding: 1.5px;
+    isolation: isolate;
+    cursor: pointer;
+  }
+
+  .zk-collapsed-bar__border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    padding: 1.5px;
+    background: conic-gradient(
+      from var(--border-angle),
+      transparent 0%,
+      transparent 6%,
+      #3b82f6 8%,
+      #06b6d4 10%,
+      #84cc16 12%,
+      #eab308 14%,
+      transparent 16%,
+      transparent 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: rotate-border 4s linear infinite;
+  }
+
+  .zk-collapsed-bar__border::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 999px;
+    background: conic-gradient(
+      from var(--border-angle),
+      transparent 0%,
+      transparent 6%,
+      #3b82f6 8%,
+      #06b6d4 10%,
+      #84cc16 12%,
+      #eab308 14%,
+      transparent 16%,
+      transparent 100%
+    );
+    filter: blur(6px);
+    opacity: 0.4;
+    z-index: -1;
+    animation: rotate-border 4s linear infinite;
+  }
+
+  .zk-collapsed-bar__inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 64px;
+    padding: 0 24px;
+    background: white;
+    border-radius: 999px;
+    position: relative;
+  }
+
+  .zk-collapsed-bar__border:hover .zk-collapsed-bar__inner {
+    background: #fafafa;
+  }
+
+  .zk-collapsed-bar__icon {
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+
+  .zk-collapsed-bar__placeholder {
+    flex: 1;
+    font-size: 15px;
+    color: #9ca3af;
+    user-select: none;
+  }
+
+  .zk-collapsed-bar__chips {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    opacity: 0.85;
+  }
+
+  /* ===== Expanded Panel ===== */
+  .zk-expanded-panel {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    width: 720px;
+    max-height: 75vh;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
     z-index: 9999;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-  }
-
-  .zk-widget > * {
-    pointer-events: auto;
-  }
-
-  /* Unified Chat Panel - Expands/Collapses Smoothly */
-  .zk-chat-panel {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 16px;
-    background: #ebebeb;
-    border-radius: 16px 16px 0 0;
-    border: 0.5px solid #d4d4d4;
-    border-bottom: none;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Collapsed State */
-  .zk-chat-collapsed {
-    padding-bottom: 20px;
-  }
-
-  .zk-chat-collapsed .zk-messages-wrapper {
-    max-height: 0;
-    opacity: 0;
+    animation: zk-panel-slide-up 200ms ease both;
     overflow: hidden;
   }
 
-  /* Expanded State */
-  .zk-chat-expanded {
-    padding-bottom: 20px;
+  @keyframes zk-panel-slide-up {
+    from {
+      transform: translateX(-50%) translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
   }
 
-  .zk-chat-expanded .zk-messages-wrapper {
-    max-height: 350px;
-    opacity: 1;
-  }
-
-  /* Chat Header */
-  .zk-chat-header {
+  /* Header */
+  .zk-expanded-panel__header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: background 0.15s;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
   }
 
-  .zk-chat-header:hover {
-    background: #e0e0e0;
-  }
-
-  .zk-panel-title {
+  .zk-expanded-panel__title {
     flex: 1;
     font-weight: 600;
-    font-size: 14px;
-    color: #374151;
+    font-size: 15px;
+    color: #111827;
   }
 
-  .zk-toggle-btn {
+  .zk-expanded-panel__close {
     background: none;
     border: none;
-    color: #6b7280;
+    color: #9ca3af;
     cursor: pointer;
     padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    transition: background 0.15s, color 0.15s;
+    border-radius: 8px;
+    transition: background 150ms, color 150ms;
   }
 
-  .zk-toggle-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
+  .zk-expanded-panel__close:hover {
+    background: #f3f4f6;
     color: #374151;
   }
 
-  /* Messages Wrapper - Animates height */
-  .zk-messages-wrapper {
-    overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  /* Suggestion Chips Section */
+  .zk-expanded-panel__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
   }
 
-  .zk-messages {
+  /* Conversation Area */
+  .zk-expanded-panel__messages {
+    flex: 1;
     overflow-y: auto;
-    padding: 8px 16px 16px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 320px;
+    min-height: 80px;
   }
 
+  .zk-expanded-panel__messages::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .zk-expanded-panel__messages::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .zk-expanded-panel__messages::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 3px;
+  }
+
+  .zk-expanded-panel__messages::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+  }
+
+  .zk-expanded-panel__messages {
+    scrollbar-width: thin;
+    scrollbar-color: #e5e7eb transparent;
+  }
+
+  /* Input Section */
+  .zk-expanded-panel__input {
+    padding: 12px 16px 14px;
+    border-top: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+
+  /* ===== Shared: Chip ===== */
+  .zk-chip {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 150ms;
+    font-family: inherit;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
+  .zk-chip:hover {
+    background: #f9fafb;
+    border-color: ${primaryColor};
+    color: ${primaryColor};
+  }
+
+  /* ===== Messages ===== */
   .zk-message {
     max-width: 85%;
-    animation: zk-fade-in 0.2s ease;
+    animation: zk-fade-in 200ms ease;
   }
 
   @keyframes zk-fade-in {
@@ -151,6 +302,14 @@ export const styles = (primaryColor: string) => `
     border-bottom-left-radius: 4px;
   }
 
+  .zk-message__suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  /* ===== Typing Indicator ===== */
   .zk-typing {
     display: flex;
     gap: 4px;
@@ -173,47 +332,13 @@ export const styles = (primaryColor: string) => `
     40% { transform: scale(1); }
   }
 
-  .zk-suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .zk-suggestion {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 6px 12px;
-    font-size: 12px;
-    color: #4b5563;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .zk-suggestion:hover {
-    background: #f9fafb;
-    border-color: ${primaryColor};
-    color: ${primaryColor};
-  }
-
-  /* Animated border custom property */
+  /* ===== Input Container with Animated Border ===== */
   @property --border-angle {
     syntax: '<angle>';
     initial-value: 0deg;
     inherits: false;
   }
 
-  /* Bottom Input Bar */
-  .zk-input-bar {
-    width: 100%;
-    max-width: 600px;
-    padding: 12px 0 16px 0;
-    background: transparent;
-    margin: 0 16px;
-  }
-
-  /* Input Container with Animated Border */
   .zk-input-container {
     position: relative;
     background: #e5e7eb;
@@ -222,7 +347,6 @@ export const styles = (primaryColor: string) => `
     isolation: isolate;
   }
 
-  /* Subtle base border */
   .zk-input-container::before {
     content: '';
     position: absolute;
@@ -251,7 +375,6 @@ export const styles = (primaryColor: string) => `
     animation: rotate-border 4s linear infinite;
   }
 
-  /* Glow effect - follows the spark */
   .zk-input-container::after {
     content: '';
     position: absolute;
@@ -269,26 +392,22 @@ export const styles = (primaryColor: string) => `
       transparent 100%
     );
     filter: blur(6px);
-    opacity: 0.5;
+    opacity: 0.4;
     z-index: -1;
     animation: rotate-border 4s linear infinite;
   }
 
   @keyframes rotate-border {
-    0% {
-      --border-angle: 0deg;
-    }
-    100% {
-      --border-angle: 360deg;
-    }
+    0% { --border-angle: 0deg; }
+    100% { --border-angle: 360deg; }
   }
 
   .zk-input-inner {
     position: relative;
     background: white;
     border-radius: 22px;
-    padding: 12px 16px;
-    min-height: 48px;
+    padding: 10px 16px;
+    min-height: 44px;
     display: flex;
     align-items: flex-end;
   }
@@ -296,42 +415,35 @@ export const styles = (primaryColor: string) => `
   .zk-input {
     flex: 1;
     border: none;
-    font-size: 15px;
+    font-size: 14px;
     outline: none;
     background: transparent;
     resize: none;
-    line-height: 24px;
+    line-height: 22px;
     color: #1f2937;
-    min-height: 24px;
-    max-height: 216px;
+    min-height: 22px;
+    max-height: 120px;
     overflow-y: auto;
     font-family: inherit;
     padding: 0;
     padding-right: 8px;
     margin: 0;
-    margin-right: 48px;
+    margin-right: 40px;
   }
 
-  /* Custom scrollbar styling */
   .zk-input::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   .zk-input::-webkit-scrollbar-track {
     background: transparent;
-    margin: 4px 0;
   }
 
   .zk-input::-webkit-scrollbar-thumb {
     background: #d1d5db;
-    border-radius: 3px;
+    border-radius: 2px;
   }
 
-  .zk-input::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
-  }
-
-  /* Firefox scrollbar */
   .zk-input {
     scrollbar-width: thin;
     scrollbar-color: #d1d5db transparent;
@@ -348,10 +460,10 @@ export const styles = (primaryColor: string) => `
 
   .zk-send {
     position: absolute;
-    bottom: 8px;
-    right: 12px;
-    width: 36px;
-    height: 36px;
+    bottom: 6px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: #f3f4f6;
     color: #374151;
@@ -360,7 +472,7 @@ export const styles = (primaryColor: string) => `
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s, transform 0.15s, color 0.15s;
+    transition: background 150ms, transform 150ms, color 150ms;
     flex-shrink: 0;
   }
 
@@ -374,6 +486,7 @@ export const styles = (primaryColor: string) => `
     cursor: not-allowed;
   }
 
+  /* ===== Powered By ===== */
   .zk-powered-by {
     text-align: center;
     font-size: 11px;
@@ -390,60 +503,74 @@ export const styles = (primaryColor: string) => `
     text-decoration: underline;
   }
 
-  /* When chat panel is shown, input overlaps it */
-  .zk-chat-panel + .zk-input-bar {
-    margin-top: -20px;
-    padding-top: 0;
-    position: relative;
-    z-index: 2;
+  /* ===== Responsive: Tablet ===== */
+  @media (max-width: 768px) and (min-width: 641px) {
+    .zk-collapsed-bar {
+      width: 90%;
+    }
+
+    .zk-expanded-panel {
+      width: 90%;
+    }
   }
 
-  .zk-preview-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: ${primaryColor}20;
-    color: ${primaryColor};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .zk-preview-text {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #374151;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-
-  /* Mobile Responsive */
+  /* ===== Responsive: Mobile ===== */
   @media (max-width: 640px) {
-    .zk-chat-panel {
-      margin: 0 12px;
-      border-radius: 16px 16px 0 0;
-      max-width: calc(100% - 24px);
+    .zk-collapsed-bar {
+      width: calc(100% - 32px);
+      bottom: 16px;
     }
 
-    .zk-chat-expanded .zk-messages-wrapper {
-      max-height: 50vh;
+    .zk-expanded-panel {
+      width: calc(100% - 32px);
+      bottom: 16px;
+      max-height: 80vh;
+      border-radius: 16px;
     }
 
-    .zk-input-bar {
-      margin: 0 12px;
-      padding: 12px 0 16px 0;
-      max-width: calc(100% - 24px);
+    .zk-expanded-panel__header {
+      padding: 14px 16px;
     }
 
-    .zk-chat-panel + .zk-input-bar {
-      margin-top: -20px;
+    .zk-expanded-panel__chips {
+      padding: 12px 16px;
     }
 
-    .zk-messages {
-      max-height: calc(50vh - 60px);
+    .zk-expanded-panel__messages {
+      padding: 12px 16px;
+    }
+
+    .zk-expanded-panel__input {
+      padding: 10px 12px 12px;
+    }
+  }
+
+  /* ===== Reduced Motion ===== */
+  @media (prefers-reduced-motion: reduce) {
+    .zk-collapsed-bar {
+      transition: none;
+    }
+
+    .zk-collapsed-bar--visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .zk-expanded-panel {
+      animation: none;
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .zk-message {
+      animation: none;
+    }
+
+    .zk-collapsed-bar__border::before,
+    .zk-collapsed-bar__border::after,
+    .zk-input-container::before,
+    .zk-input-container::after {
+      animation: none;
     }
   }
 `
