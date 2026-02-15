@@ -175,8 +175,10 @@ export const styles = (primaryColor: string) => `
     align-items: center;
     height: 64px;
     padding: 0 24px;
+    background: white;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     flex-shrink: 0;
+    border-radius: 24px 24px 0 0;
   }
 
   .zk-expanded-panel__title {
