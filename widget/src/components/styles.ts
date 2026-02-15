@@ -10,20 +10,17 @@ export const styles = (primaryColor: string) => `
 
   /* ===== Body Layout Shift (Docked Mode) ===== */
   body.zk-docked-active {
-    display: flex !important;
-  }
-
-  body.zk-docked-active > *:not(#zunkiree-widget-root) {
-    flex: 1 1 auto;
-    min-width: 0;
-    transition: flex 200ms ease;
+    margin-right: 460px !important;
+    transition: margin-right 200ms ease;
   }
 
   #zunkiree-widget-root.zk-docked-mode {
+    position: fixed;
+    top: 0;
+    right: 0;
     width: 460px;
-    flex: 0 0 460px;
     height: 100vh;
-    transition: width 200ms ease;
+    z-index: 9999;
   }
 
   /* ===== Collapsed Bar ===== */
