@@ -130,7 +130,7 @@ export const styles = (primaryColor: string) => `
     bottom: 24px;
     left: 50%;
     width: 720px;
-    max-height: 75vh;
+    max-height: 85vh;
     background: white;
     border-radius: 20px;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -524,7 +524,7 @@ export const styles = (primaryColor: string) => `
     .zk-expanded-panel {
       width: calc(100% - 32px);
       bottom: 16px;
-      max-height: 80vh;
+      max-height: 90vh;
       border-radius: 16px;
     }
 
