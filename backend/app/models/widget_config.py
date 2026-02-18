@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import String, Boolean, DateTime, ForeignKey, Integer, Text, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
@@ -21,12 +24,12 @@ class WidgetConfig(Base):
     tone: Mapped[str] = mapped_column(String(50), default="neutral")  # formal, neutral, friendly
     primary_color: Mapped[str] = mapped_column(String(7), default="#2563eb")
     placeholder_text: Mapped[str] = mapped_column(String(255), default="Ask a question...")
-    welcome_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    welcome_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     fallback_message: Mapped[str] = mapped_column(
         Text,
         default="I don't have that information yet. Please contact us directly for help."
     )
-    allowed_topics: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON string of topics
+    allowed_topics: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON string of topics
     max_response_length: Mapped[int] = mapped_column(Integer, default=500)
     show_sources: Mapped[bool] = mapped_column(Boolean, default=True)
     show_suggestions: Mapped[bool] = mapped_column(Boolean, default=True)

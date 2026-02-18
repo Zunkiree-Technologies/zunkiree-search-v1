@@ -9,7 +9,7 @@ asyncpg>=0.29.0
 alembic>=1.13.1
 
 # Vector database
-pinecone>=8.0.0
+pinecone>=5.0.0
 
 # OpenAI
 openai>=1.12.0

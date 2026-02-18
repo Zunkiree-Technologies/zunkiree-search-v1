@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import String, DateTime, ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
@@ -18,12 +21,12 @@ class QueryLog(Base):
         index=True,
     )
     question: Mapped[str] = mapped_column(Text, nullable=False)
-    answer: Mapped[str | None] = mapped_column(Text, nullable=True)
-    chunks_used: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    origin_domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    chunks_used: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    response_time_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    origin_domain: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ip_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
     # Relationships

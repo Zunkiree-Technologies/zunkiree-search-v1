@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 import secrets
 from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File

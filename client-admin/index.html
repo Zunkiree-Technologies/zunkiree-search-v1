@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zunkiree Client Dashboard</title>
+  <title>Orca - by Zunkireelabs</title>
   <style>
     * {
       box-sizing: border-box;
@@ -15,27 +15,171 @@
       background: #f5f5f5;
       min-height: 100vh;
     }
-    .header {
-      background: #2563eb;
-      color: white;
-      padding: 20px 40px;
+    /* Dashboard Layout */
+    .dashboard {
+      height: 100vh;
       display: flex;
+      background: white;
+    }
+    .dashboard-sidebar {
+      width: 240px;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width 0.2s ease;
+    }
+    .dashboard.collapsed .dashboard-sidebar {
+      width: 68px;
+    }
+    .sidebar-header {
+      padding: 20px 16px;
+      display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
     }
-    .header h1 {
-      font-size: 1.5rem;
-    }
-    .header-right {
+    .sidebar-brand {
       display: flex;
       align-items: center;
-      gap: 16px;
-      font-size: 14px;
+      gap: 10px;
+      overflow: hidden;
     }
-    .header-status {
+    .sidebar-brand img {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .sidebar-brand span {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .dashboard.collapsed .sidebar-brand span {
+      opacity: 0;
+      width: 0;
+    }
+    .collapse-btn {
+      background: transparent;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: #6b7280;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .collapse-btn:hover {
+      background: #ebebeb;
+      color: #111;
+    }
+    .collapse-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    .dashboard.collapsed .collapse-btn {
+      display: none;
+    }
+    /* Logo hover to show expand icon when collapsed */
+    .sidebar-brand {
+      position: relative;
+      cursor: pointer;
+    }
+    .sidebar-brand .expand-icon {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      color: #6b7280;
+    }
+    .dashboard.collapsed .sidebar-brand:hover img {
+      opacity: 0;
+    }
+    .dashboard.collapsed .sidebar-brand:hover .expand-icon {
+      display: block;
+    }
+    .sidebar-nav {
+      flex: 1;
+      padding: 8px 12px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .nav-item:hover {
+      background: #f3f4f6;
+    }
+    .nav-item.active {
+      background: #111;
+      color: white;
+    }
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .nav-item span {
+      transition: opacity 0.2s;
+    }
+    .dashboard.collapsed .nav-item {
+      justify-content: center;
+      padding: 12px;
+    }
+    .dashboard.collapsed .nav-item span {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+    .sidebar-footer {
+      padding: 12px;
+    }
+    .dashboard-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .dashboard-header {
+      height: 60px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+    .dashboard-header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .dashboard-status {
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 13px;
+      color: #6b7280;
     }
     .status-dot {
       width: 8px;
@@ -46,40 +190,58 @@
     .status-dot.offline {
       background: #ef4444;
     }
-    .logout-btn {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white;
-      padding: 6px 12px;
+    .dashboard-user {
+      font-size: 14px;
+      font-weight: 500;
+      color: #111;
+    }
+    .dashboard-logout {
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      padding: 6px 14px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
     }
-    .logout-btn:hover {
-      background: rgba(255,255,255,0.3);
+    .dashboard-logout:hover {
+      background: #f3f4f6;
+      color: #111;
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px;
+    .dashboard-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 40px 32px;
+      display: flex;
+      flex-direction: column;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 24px;
+    .section {
+      display: none;
+      max-width: 800px;
     }
-    .card {
+    .section.active {
+      display: block;
+    }
+    .section-header {
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 4px;
+    }
+    .section-subtitle {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .section-card {
       background: white;
       border-radius: 12px;
       padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .card h2 {
-      font-size: 1.1rem;
-      color: #333;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .form-group {
       margin-bottom: 16px;
@@ -243,72 +405,646 @@
       font-size: 13px;
     }
 
-    /* Login */
-    .login-wrapper {
+    /* New Task Section - Centered Layout */
+    #section-newtask {
       display: flex;
-      justify-content: center;
       align-items: center;
-      min-height: calc(100vh - 80px);
+      justify-content: center;
+      height: 100%;
+      max-width: none;
+    }
+    #section-newtask.active {
+      display: flex;
+    }
+    .newtask-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      width: 100%;
+    }
+    .newtask-heading {
+      font-size: 36px;
+      font-weight: 500;
+      color: #111;
+      margin-bottom: 32px;
+      text-align: center;
+      font-style: italic;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+    .newtask-input-container {
+      width: 100%;
+      max-width: 680px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .newtask-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      color: #111;
+      background: transparent;
+      resize: none;
+      min-height: 24px;
+      font-family: inherit;
+    }
+    .newtask-input::placeholder {
+      color: #9ca3af;
+    }
+    .newtask-input-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .newtask-input-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .newtask-input-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .newtask-action-btn {
+      background: transparent;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: #6b7280;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .newtask-action-btn:hover {
+      background: #f3f4f6;
+      color: #111;
+    }
+    .newtask-action-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+    .newtask-submit-btn {
+      background: #111;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .newtask-submit-btn:hover {
+      background: #333;
+    }
+    .newtask-submit-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    .newtask-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+      max-width: 680px;
+    }
+    .newtask-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .newtask-chip:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+    .newtask-chip svg {
+      width: 18px;
+      height: 18px;
+      color: #6b7280;
+    }
+
+    /* Login Page - Manus-style layout */
+    .login-page {
+      height: 100vh;
+      background: #f5f5f0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Particle wave canvas */
+    .particle-wave-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Ensure content is above the background */
+    .login-header,
+    .login-main,
+    .login-footer {
+      position: relative;
+      z-index: 1;
+    }
+    .login-header {
+      flex-shrink: 0;
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .login-brand img {
+      width: 28px;
+      height: 28px;
+    }
+    .login-brand span {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111;
+    }
+    .login-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      overflow-y: auto;
+    }
+    .login-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 20px;
+    }
+    .login-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .login-subtitle {
+      font-size: 15px;
+      color: #6b7280;
+      margin-bottom: 24px;
+      text-align: center;
     }
     .login-card {
-      background: white;
-      border-radius: 12px;
-      padding: 40px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 400px;
+      max-width: 380px;
     }
-    .login-card h2 {
-      text-align: center;
-      margin-bottom: 24px;
-      color: #333;
+    .oauth-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #111;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 10px;
+    }
+    .oauth-btn:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+    .oauth-btn img {
+      width: 18px;
+      height: 18px;
+    }
+    .oauth-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 16px 0;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .divider span {
+      padding: 0 14px;
+    }
+    .login-card .form-group {
+      margin-bottom: 12px;
+    }
+    .login-card input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: white;
+    }
+    .login-card input:focus {
+      outline: none;
+      border-color: #111;
+      box-shadow: none;
+    }
+    .login-card input::placeholder {
+      color: #9ca3af;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      background: #6b7280;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+    .login-btn:hover {
+      background: #4b5563;
+    }
+    .login-footer {
+      flex-shrink: 0;
+      padding: 16px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .login-footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .login-footer-brand img {
+      width: 18px;
+      height: 18px;
+    }
+    .login-footer-brand span {
+      color: #111;
+      font-weight: 500;
+    }
+    .login-footer-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .login-footer-links a {
+      color: #6b7280;
+      text-decoration: none;
+    }
+    .login-footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Hide header on login page */
+    body.login-active .header {
+      display: none;
+    }
+
+    /* API Status on login page */
+    .login-api-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #6b7280;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Zunkiree Dashboard</h1>
-    <div class="header-right">
-      <div class="header-status">
-        <div class="status-dot" id="apiStatus"></div>
-        <span id="apiStatusText">Checking...</span>
-      </div>
-      <span id="headerUser" class="hidden"></span>
-      <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
-    </div>
-  </div>
-
   <!-- Login View -->
-  <div id="loginView">
-    <div class="login-wrapper">
+  <div id="loginView" class="login-page">
+    <!-- Particle wave background -->
+    <canvas id="particleWave" class="particle-wave-canvas"></canvas>
+
+    <!-- Header with brand and API status -->
+    <div class="login-header">
+      <div class="login-brand">
+        <img src="assets/orca-icon.png" alt="Orca">
+        <span>orca</span>
+      </div>
+      <div class="login-api-status">
+        <div class="status-dot" id="loginApiStatus"></div>
+        <span id="loginApiStatusText">Checking...</span>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="login-main">
+      <img src="assets/orca-icon.png" alt="Orca" class="login-icon">
+      <h1 class="login-title">Sign in or sign up</h1>
+      <p class="login-subtitle">Start using Orca</p>
+
       <div class="login-card">
-        <h2>Client Login</h2>
         <div id="loginAlerts"></div>
+
+        <!-- OAuth Buttons (non-functional) -->
+        <button type="button" class="oauth-btn" onclick="showOAuthMessage()">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+
+        <button type="button" class="oauth-btn" onclick="showOAuthMessage()">
+          <svg viewBox="0 0 23 23"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg>
+          Continue with Microsoft
+        </button>
+
+        <button type="button" class="oauth-btn" onclick="showOAuthMessage()">
+          <svg viewBox="0 0 24 24" fill="#000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Continue with Apple
+        </button>
+
+        <div class="divider"><span>Or</span></div>
+
+        <!-- Email/Password Form -->
         <form id="loginForm">
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="loginEmail" placeholder="you@company.com" required>
+            <input type="email" id="loginEmail" placeholder="Enter your email address" required>
           </div>
           <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="loginPassword" placeholder="Your password" required>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required>
           </div>
-          <button type="submit" style="width:100%; margin-top: 8px;">Sign In</button>
+          <button type="submit" class="login-btn">Continue</button>
         </form>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <div class="login-footer-brand">
+        <span>from</span>
+        <img src="assets/icon.png" alt="Zunkireelabs">
+        <span>zunkireelabs</span>
+      </div>
+      <div class="login-footer-links">
+        <a href="#">Terms of service</a>
+        <a href="#">Privacy policy</a>
+        <span>&copy;2026 Zunkireelabs</span>
       </div>
     </div>
   </div>
 
   <!-- Dashboard View -->
-  <div id="dashboardView" class="hidden">
-    <div class="container">
-      <div id="alerts"></div>
+  <div id="dashboardView" class="dashboard hidden">
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand" onclick="expandSidebarIfCollapsed()">
+          <img src="assets/orca-icon.png" alt="Orca">
+          <span>orca</span>
+          <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" /></svg>
+        </div>
+        <button class="collapse-btn" onclick="toggleSidebar()" title="Collapse sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" /></svg>
+        </button>
+      </div>
+      <div class="sidebar-nav">
+        <button class="nav-item active" onclick="showSection('newtask')" data-section="newtask" title="New Task">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+          <span>New Task</span>
+        </button>
+        <button class="nav-item" onclick="showSection('ingest')" data-section="ingest" title="Ingest Data">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+          <span>Ingest Data</span>
+        </button>
+        <button class="nav-item" onclick="showSection('jobs')" data-section="jobs" title="Ingestion Jobs">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
+          <span>Ingestion Jobs</span>
+        </button>
+        <button class="nav-item" onclick="showSection('widget')" data-section="widget" title="Widget Config">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          <span>Widget Config</span>
+        </button>
+        <button class="nav-item" onclick="showSection('embed')" data-section="embed" title="Embed Code">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>
+          <span>Embed Code</span>
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        <button class="nav-item" onclick="showSection('profile')" data-section="profile" title="Profile">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+          <span>Profile</span>
+        </button>
+      </div>
+    </div>
 
-      <div class="grid">
-        <!-- Profile -->
-        <div class="card">
-          <h2>Profile</h2>
-          <div id="profileContent">
+    <!-- Content Area -->
+    <div class="dashboard-content">
+      <!-- Header -->
+      <div class="dashboard-header">
+        <div class="dashboard-header-right">
+          <div class="dashboard-status">
+            <div class="status-dot" id="apiStatus"></div>
+            <span id="apiStatusText">Checking...</span>
+          </div>
+          <span class="dashboard-user" id="headerUser">-</span>
+          <button class="dashboard-logout" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="dashboard-main">
+        <div id="alerts"></div>
+
+        <!-- New Task Section -->
+        <div id="section-newtask" class="section active">
+          <div class="newtask-container">
+            <h1 class="newtask-heading">What can I do for you?</h1>
+
+            <div class="newtask-input-container">
+              <textarea class="newtask-input" placeholder="Ask anything or start a task..." rows="1" id="newtaskInput"></textarea>
+              <div class="newtask-input-actions">
+                <div class="newtask-input-left">
+                  <button class="newtask-action-btn" title="Add attachment">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                  </button>
+                  <button class="newtask-action-btn" title="Tools">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" /></svg>
+                  </button>
+                </div>
+                <div class="newtask-input-right">
+                  <button class="newtask-submit-btn" title="Submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="newtask-chips">
+              <button class="newtask-chip" onclick="showSection('ingest'); showIngestTab('url');">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+                Ingest URL
+              </button>
+              <button class="newtask-chip" onclick="showSection('ingest'); showIngestTab('text');">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                Add Text
+              </button>
+              <button class="newtask-chip" onclick="showSection('widget')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                Configure Widget
+              </button>
+              <button class="newtask-chip" onclick="showSection('embed')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>
+                Get Embed Code
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingest Data Section -->
+        <div id="section-ingest" class="section">
+          <div class="section-header">
+            <h1 class="section-title">Ingest Data</h1>
+            <p class="section-subtitle">Add content to your knowledge base via URL or text</p>
+          </div>
+          <div class="section-card">
+            <div class="tabs">
+              <button class="tab active" onclick="showIngestTab('url')">URL</button>
+              <button class="tab" onclick="showIngestTab('text')">Text</button>
+            </div>
+            <form id="ingestUrlForm">
+              <div class="form-group">
+                <label>URL to Crawl</label>
+                <input type="url" id="ingestUrl" placeholder="https://yoursite.com/about" required>
+              </div>
+              <div class="form-group">
+                <label>Max Pages</label>
+                <input type="number" id="maxPages" value="1" min="1" max="50">
+              </div>
+              <button type="submit">Ingest URL</button>
+            </form>
+            <form id="ingestTextForm" class="hidden">
+              <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="textTitle" placeholder="About Us" required>
+              </div>
+              <div class="form-group">
+                <label>Content</label>
+                <textarea id="textContent" placeholder="Enter your content here..." required></textarea>
+              </div>
+              <button type="submit">Ingest Text</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Ingestion Jobs Section -->
+        <div id="section-jobs" class="section">
+          <div class="section-header">
+            <h1 class="section-title">Ingestion Jobs</h1>
+            <p class="section-subtitle">Track the status of your content ingestion</p>
+          </div>
+          <div class="section-card">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+              <button onclick="loadJobs()" style="font-size: 13px; padding: 8px 16px;">Refresh</button>
+            </div>
+            <div id="jobsList"><p style="color: #6b7280; text-align: center; padding: 20px;">Loading...</p></div>
+          </div>
+        </div>
+
+        <!-- Widget Config Section -->
+        <div id="section-widget" class="section">
+          <div class="section-header">
+            <h1 class="section-title">Widget Configuration</h1>
+            <p class="section-subtitle">Customize your chat widget appearance and behavior</p>
+          </div>
+          <div class="section-card">
+            <form id="configForm">
+              <div class="form-group">
+                <label>Brand Name</label>
+                <input type="text" id="brandName" placeholder="Acme Corp">
+              </div>
+              <div class="form-group">
+                <label>Tone</label>
+                <select id="tone">
+                  <option value="neutral">Neutral</option>
+                  <option value="formal">Formal</option>
+                  <option value="friendly">Friendly</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Primary Color</label>
+                <input type="color" id="primaryColor" value="#2563eb">
+              </div>
+              <div class="form-group">
+                <label>Welcome Message</label>
+                <input type="text" id="welcomeMessage" placeholder="Hi! How can I help you?">
+              </div>
+              <div class="btn-group">
+                <button type="button" class="secondary" onclick="loadConfig()">Load Current</button>
+                <button type="submit">Save Config</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Embed Code Section -->
+        <div id="section-embed" class="section">
+          <div class="section-header">
+            <h1 class="section-title">Embed Code</h1>
+            <p class="section-subtitle">Add this snippet to your website to enable the chat widget</p>
+          </div>
+          <div class="section-card">
+            <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">Copy this snippet and paste it into your website's HTML, just before the closing &lt;/body&gt; tag.</p>
+            <div class="embed-code" id="embedCode">Loading...</div>
+            <button class="copy-btn" onclick="copyEmbedCode()">Copy Code</button>
+          </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="section-profile" class="section">
+          <div class="section-header">
+            <h1 class="section-title">Profile</h1>
+            <p class="section-subtitle">Your account information</p>
+          </div>
+          <div class="section-card">
             <div class="profile-field">
               <div class="profile-label">Name</div>
               <div class="profile-value" id="profileName">-</div>
@@ -327,93 +1063,12 @@
             </div>
           </div>
         </div>
-
-        <!-- Ingest Data -->
-        <div class="card">
-          <h2>Ingest Data</h2>
-          <div class="tabs">
-            <button class="tab active" onclick="showIngestTab('url')">URL</button>
-            <button class="tab" onclick="showIngestTab('text')">Text</button>
-          </div>
-
-          <form id="ingestUrlForm">
-            <div class="form-group">
-              <label>URL to Crawl</label>
-              <input type="url" id="ingestUrl" placeholder="https://yoursite.com/about" required>
-            </div>
-            <div class="form-group">
-              <label>Max Pages</label>
-              <input type="number" id="maxPages" value="1" min="1" max="50">
-            </div>
-            <button type="submit">Ingest URL</button>
-          </form>
-
-          <form id="ingestTextForm" class="hidden">
-            <div class="form-group">
-              <label>Title</label>
-              <input type="text" id="textTitle" placeholder="About Us" required>
-            </div>
-            <div class="form-group">
-              <label>Content</label>
-              <textarea id="textContent" placeholder="Enter your content here..." required></textarea>
-            </div>
-            <button type="submit">Ingest Text</button>
-          </form>
-        </div>
-
-        <!-- Widget Config -->
-        <div class="card">
-          <h2>Widget Configuration</h2>
-          <form id="configForm">
-            <div class="form-group">
-              <label>Brand Name</label>
-              <input type="text" id="brandName" placeholder="Acme Corp">
-            </div>
-            <div class="form-group">
-              <label>Tone</label>
-              <select id="tone">
-                <option value="neutral">Neutral</option>
-                <option value="formal">Formal</option>
-                <option value="friendly">Friendly</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Primary Color</label>
-              <input type="color" id="primaryColor" value="#2563eb">
-            </div>
-            <div class="form-group">
-              <label>Welcome Message</label>
-              <input type="text" id="welcomeMessage" placeholder="Hi! How can I help you?">
-            </div>
-            <div class="btn-group">
-              <button type="button" class="secondary" onclick="loadConfig()">Load Current</button>
-              <button type="submit">Save Config</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Embed Code -->
-        <div class="card">
-          <h2>Embed Code</h2>
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">Copy this snippet and paste it into your website's HTML.</p>
-          <div class="embed-code" id="embedCode">Loading...</div>
-          <button class="copy-btn" onclick="copyEmbedCode()">Copy Code</button>
-        </div>
-
-        <!-- Ingestion Jobs -->
-        <div class="card" style="grid-column: span 2;">
-          <h2 style="display: flex; justify-content: space-between; align-items: center;">
-            Ingestion Jobs
-            <button onclick="loadJobs()" style="font-size: 12px; padding: 6px 14px;">Refresh</button>
-          </h2>
-          <div id="jobsList"><p style="color: #6b7280; text-align: center; padding: 20px;">Loading...</p></div>
-        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const API_URL = 'http://localhost:8000';
+    const API_URL = 'http://localhost:8001';
     const TOKEN_KEY = 'zunkiree_client_token';
 
     // --- Token management ---
@@ -455,17 +1110,50 @@
 
     // --- View management ---
     function showLoginView() {
+      document.body.classList.add('login-active');
       document.getElementById('loginView').classList.remove('hidden');
       document.getElementById('dashboardView').classList.add('hidden');
-      document.getElementById('logoutBtn').classList.add('hidden');
-      document.getElementById('headerUser').classList.add('hidden');
     }
 
     function showDashboardView() {
+      document.body.classList.remove('login-active');
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('dashboardView').classList.remove('hidden');
-      document.getElementById('logoutBtn').classList.remove('hidden');
-      document.getElementById('headerUser').classList.remove('hidden');
+    }
+
+    // --- Sidebar toggle ---
+    function toggleSidebar() {
+      const dashboard = document.getElementById('dashboardView');
+      dashboard.classList.toggle('collapsed');
+    }
+
+    function expandSidebarIfCollapsed() {
+      const dashboard = document.getElementById('dashboardView');
+      if (dashboard.classList.contains('collapsed')) {
+        dashboard.classList.remove('collapsed');
+      }
+    }
+
+    // --- Section navigation ---
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      // Show selected section
+      const targetSection = document.getElementById('section-' + sectionId);
+      if (targetSection) {
+        targetSection.classList.add('active');
+      }
+
+      // Update nav items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.section === sectionId) {
+          item.classList.add('active');
+        }
+      });
     }
 
     function logout() {
@@ -485,18 +1173,26 @@
 
     // --- API status ---
     async function checkApiStatus() {
+      const statusDots = [document.getElementById('apiStatus'), document.getElementById('loginApiStatus')];
+      const statusTexts = [document.getElementById('apiStatusText'), document.getElementById('loginApiStatusText')];
+
       try {
         const res = await fetch(`${API_URL}/health`);
         if (res.ok) {
-          document.getElementById('apiStatus').classList.remove('offline');
-          document.getElementById('apiStatusText').textContent = 'API Connected';
+          statusDots.forEach(dot => dot && dot.classList.remove('offline'));
+          statusTexts.forEach(text => text && (text.textContent = 'API Connected'));
         } else {
           throw new Error();
         }
       } catch {
-        document.getElementById('apiStatus').classList.add('offline');
-        document.getElementById('apiStatusText').textContent = 'API Offline';
+        statusDots.forEach(dot => dot && dot.classList.add('offline'));
+        statusTexts.forEach(text => text && (text.textContent = 'API Offline'));
       }
+    }
+
+    // --- OAuth placeholder ---
+    function showOAuthMessage() {
+      showAlert('OAuth login coming soon. Please use email and password.', 'info', 'loginAlerts');
     }
 
     // --- Login ---
@@ -739,8 +1435,12 @@
 
     // --- Tab switching ---
     function showIngestTab(tab) {
-      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+      document.querySelectorAll('.tabs .tab').forEach(t => {
+        t.classList.remove('active');
+        if ((tab === 'url' && t.textContent === 'URL') || (tab === 'text' && t.textContent === 'Text')) {
+          t.classList.add('active');
+        }
+      });
 
       if (tab === 'url') {
         document.getElementById('ingestUrlForm').classList.remove('hidden');
@@ -777,6 +1477,108 @@
     }
 
     init();
+
+    // --- Ocean Wave Particle Field ---
+    (function() {
+      const canvas = document.getElementById('particleWave');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      let animationId;
+      let time = 0;
+      let width, height;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+
+      function drawOceanWave() {
+        ctx.clearRect(0, 0, width, height);
+
+        const dotSpacing = 12;
+        const cols = Math.ceil(width / dotSpacing) + 1;
+        const rows = 45;
+
+        // Wave starts from middle-bottom area
+        const startY = height * 0.55;
+        const waveDepth = height * 0.45;
+
+        for (let row = 0; row < rows; row++) {
+          // Perspective factor - rows further back (higher row number) appear higher and compressed
+          const rowRatio = row / rows;
+          const perspective = 1 - rowRatio * 0.85;
+
+          // Y position - further rows are higher on screen (perspective)
+          const baseY = startY + waveDepth * (1 - Math.pow(rowRatio, 0.7));
+
+          // Row-based opacity - fade toward horizon (more subtle)
+          const rowOpacity = Math.pow(1 - rowRatio, 0.6) * 0.25;
+
+          // Dot size decreases with distance (smaller dots)
+          const baseDotSize = 0.9 * perspective + 0.2;
+
+          for (let col = 0; col < cols; col++) {
+            const x = col * dotSpacing;
+
+            // Ocean wave function - multiple rolling swells
+            const xNorm = x / width;
+            const zNorm = row / rows;
+
+            // Primary swell - large rolling wave moving forward
+            const swell1 = Math.sin((zNorm * 8) - time * 0.4 + xNorm * 2) * 25 * perspective;
+
+            // Secondary swell - offset angle
+            const swell2 = Math.sin((zNorm * 12) - time * 0.3 + xNorm * 1.5 + 2) * 12 * perspective;
+
+            // Gentle cross-wave
+            const cross = Math.sin((xNorm * 6) + (zNorm * 4) - time * 0.2) * 8 * perspective;
+
+            // Combine waves
+            const waveY = swell1 + swell2 + cross;
+
+            const y = baseY - waveY;
+
+            // Skip if outside visible area
+            if (y < 0 || y > height) continue;
+
+            // Slight variation in opacity based on wave height (brighter at peaks)
+            const heightBoost = Math.max(0, waveY / 40) * 0.05;
+            const opacity = Math.min(0.3, rowOpacity + heightBoost);
+
+            // Draw dot
+            ctx.beginPath();
+            ctx.arc(x, y, baseDotSize, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(120, 120, 120, ${opacity})`;
+            ctx.fill();
+          }
+        }
+      }
+
+      function animate() {
+        time += 0.015;
+        drawOceanWave();
+        animationId = requestAnimationFrame(animate);
+      }
+
+      // Initialize
+      resize();
+      window.addEventListener('resize', resize);
+      animate();
+
+      // Cleanup when leaving login page
+      const observer = new MutationObserver(() => {
+        const loginView = document.getElementById('loginView');
+        if (loginView && loginView.classList.contains('hidden')) {
+          cancelAnimationFrame(animationId);
+        } else if (loginView && !loginView.classList.contains('hidden')) {
+          cancelAnimationFrame(animationId);
+          animate();
+        }
+      });
+
+      observer.observe(document.getElementById('loginView'), { attributes: true });
+    })();
   </script>
 </body>
 </html>

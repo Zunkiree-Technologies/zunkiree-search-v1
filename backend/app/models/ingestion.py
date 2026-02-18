@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import Optional, List
 from sqlalchemy import String, DateTime, ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
@@ -18,13 +21,13 @@ class IngestionJob(Base):
         index=True,
     )
     source_type: Mapped[str] = mapped_column(String(20), nullable=False)  # url, pdf, text
-    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    source_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    source_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source_filename: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="pending", index=True)  # pending, processing, completed, failed
     chunks_created: Mapped[int] = mapped_column(Integer, default=0)
-    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
     # Relationships
@@ -51,10 +54,10 @@ class DocumentChunk(Base):
     )
     vector_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
-    content_preview: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    source_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    token_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    content_preview: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    source_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    token_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
