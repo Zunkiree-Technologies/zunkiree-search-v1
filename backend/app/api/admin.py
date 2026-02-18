@@ -51,6 +51,12 @@ class IngestTextRequest(BaseModel):
     title: str = Field("Uploaded Content", description="Title for the content")
 
 
+class IngestQARequest(BaseModel):
+    site_id: str = Field(..., description="Customer site_id")
+    question: str = Field(..., min_length=5, description="The question")
+    answer: str = Field(..., min_length=10, description="The answer")
+
+
 class JobResponse(BaseModel):
     job_id: str
     status: str
@@ -226,17 +232,25 @@ async def ingest_text(
         )
 
 
-@router.post("/ingest/document", response_model=JobResponse)
-async def ingest_document(
-    customer_id: str,
+ALLOWED_EXTENSIONS = {
+    ".pdf": "pdf",
+    ".docx": "docx",
+    ".txt": "text",
+}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+
+@router.post("/ingest/file", response_model=JobResponse)
+async def ingest_file(
+    site_id: str,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     _: str = Depends(verify_admin_key),
 ):
-    """Upload and ingest a document (PDF)."""
+    """Upload and ingest a document (PDF, DOCX, or TXT)."""
     # Get customer
     result = await db.execute(
-        select(Customer).where(Customer.site_id == customer_id)
+        select(Customer).where(Customer.site_id == site_id)
     )
     customer = result.scalar_one_or_none()
 
@@ -246,30 +260,84 @@ async def ingest_document(
             detail={"code": "CUSTOMER_NOT_FOUND", "message": "Customer not found"},
         )
 
-    # Validate file type
-    if not file.filename.lower().endswith(".pdf"):
+    # Validate file extension
+    filename = file.filename or "upload"
+    ext = "." + filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400,
-            detail={"code": "INVALID_FILE_TYPE", "message": "Only PDF files are supported"},
+            detail={"code": "INVALID_FILE_TYPE", "message": f"Allowed types: {', '.join(ALLOWED_EXTENSIONS.keys())}"},
+        )
+
+    source_type = ALLOWED_EXTENSIONS[ext]
+
+    # Read and validate file size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "FILE_TOO_LARGE", "message": f"Maximum file size is {MAX_FILE_SIZE // (1024*1024)}MB"},
         )
 
     ingestion_service = get_ingestion_service()
 
     try:
-        content = await file.read()
-
-        job = await ingestion_service.ingest_pdf(
+        job = await ingestion_service.ingest_file(
             db=db,
             customer_id=customer.id,
             site_id=customer.site_id,
-            pdf_content=content,
-            filename=file.filename,
+            file_bytes=content,
+            filename=filename,
+            source_type=source_type,
         )
 
         return JobResponse(
             job_id=str(job.id),
             status=job.status,
-            message=f"Ingestion completed. {job.chunks_created} chunks created.",
+            message=f"Ingestion {job.status}. {job.chunks_created} chunks created.",
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "INGESTION_FAILED", "message": str(e)},
+        )
+
+
+@router.post("/ingest/qa", response_model=JobResponse)
+async def ingest_qa(
+    request: IngestQARequest,
+    db: AsyncSession = Depends(get_db),
+    _: str = Depends(verify_admin_key),
+):
+    """Ingest a Q&A seed pair as structured knowledge."""
+    # Get customer
+    result = await db.execute(
+        select(Customer).where(Customer.site_id == request.site_id)
+    )
+    customer = result.scalar_one_or_none()
+
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "CUSTOMER_NOT_FOUND", "message": "Customer not found"},
+        )
+
+    ingestion_service = get_ingestion_service()
+
+    try:
+        job = await ingestion_service.ingest_qa(
+            db=db,
+            customer_id=customer.id,
+            site_id=customer.site_id,
+            question=request.question,
+            answer=request.answer,
+        )
+
+        return JobResponse(
+            job_id=str(job.id),
+            status=job.status,
+            message=f"QA seed ingested. {job.chunks_created} chunks created.",
         )
 
     except Exception as e:

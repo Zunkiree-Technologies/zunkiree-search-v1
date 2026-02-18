@@ -1,6 +1,8 @@
+import logging
 from pinecone import Pinecone
 from app.config import get_settings
 
+logger = logging.getLogger("zunkiree.vector_store")
 settings = get_settings()
 
 
@@ -62,6 +64,9 @@ class VectorStoreService:
         if site_id:
             query_filter = {"site_id": {"$eq": site_id}}
 
+        # [TEMP-LOG] Log Pinecone query details
+        logger.warning("[QUERY-TRACE] pinecone_query namespace=%s top_k=%d filter=%s index=%s", namespace, top_k, query_filter, settings.pinecone_index_name)
+
         results = self.index.query(
             vector=query_vector,
             namespace=namespace,
@@ -69,6 +74,9 @@ class VectorStoreService:
             include_metadata=False,
             filter=query_filter,
         )
+
+        # [TEMP-LOG] Log raw Pinecone response
+        logger.warning("[QUERY-TRACE] pinecone_raw_matches=%d scores=%s", len(results.matches), [(m.id[:20], m.score) for m in results.matches[:5]])
 
         return [
             {

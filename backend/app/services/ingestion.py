@@ -1,4 +1,5 @@
 import uuid
+import logging
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -8,6 +9,11 @@ from app.services.embeddings import get_embedding_service
 from app.services.vector_store import get_vector_store_service
 from app.utils.chunking import chunk_text
 from app.utils.crawling import crawl_url, extract_text_from_pdf
+from app.utils.file_parsers import extract_pdf_text, extract_docx_text, extract_plain_text
+
+logger = logging.getLogger(__name__)
+
+MIN_CONTENT_LENGTH = 300
 
 
 class IngestionService:
@@ -231,6 +237,151 @@ class IngestionService:
             job.chunks_created = len(chunks)
             job.completed_at = datetime.utcnow()
             await db.commit()
+
+        except Exception as e:
+            job.status = "failed"
+            job.error_message = str(e)
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+            raise
+
+        return job
+
+    async def ingest_file(
+        self,
+        db: AsyncSession,
+        customer_id: uuid.UUID,
+        site_id: str,
+        file_bytes: bytes,
+        filename: str,
+        source_type: str,
+    ) -> IngestionJob:
+        """
+        Ingest content from an uploaded file (PDF, DOCX, or plain text).
+
+        Args:
+            db: Database session
+            customer_id: Customer UUID
+            site_id: Customer site ID (Pinecone namespace)
+            file_bytes: Raw file bytes
+            filename: Original filename
+            source_type: File type — "pdf", "docx", or "text"
+
+        Returns:
+            IngestionJob record
+        """
+        job = IngestionJob(
+            customer_id=customer_id,
+            source_type=source_type,
+            source_filename=filename,
+            status="processing",
+            started_at=datetime.utcnow(),
+        )
+        db.add(job)
+        await db.commit()
+        await db.refresh(job)
+
+        try:
+            # Extract text based on source type
+            if source_type == "pdf":
+                text = extract_pdf_text(file_bytes)
+            elif source_type == "docx":
+                text = extract_docx_text(file_bytes)
+            else:
+                text = extract_plain_text(file_bytes)
+
+            # Content guard
+            if len(text.strip()) < MIN_CONTENT_LENGTH:
+                job.status = "failed"
+                job.error_message = f"Insufficient content extracted ({len(text.strip())} chars, minimum {MIN_CONTENT_LENGTH})"
+                job.completed_at = datetime.utcnow()
+                await db.commit()
+                logger.warning("File ingestion failed: insufficient content from %s (%d chars)", filename, len(text.strip()))
+                return job
+
+            # Chunk the content
+            chunks = chunk_text(text)
+            for chunk in chunks:
+                chunk["source_title"] = filename
+
+            # Process chunks
+            if chunks:
+                await self._process_chunks(
+                    db=db,
+                    job=job,
+                    site_id=site_id,
+                    chunks=chunks,
+                )
+
+            job.status = "completed"
+            job.chunks_created = len(chunks)
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+            logger.info("File ingestion completed: %s → %d chunks", filename, len(chunks))
+
+        except Exception as e:
+            job.status = "failed"
+            job.error_message = str(e)
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+            raise
+
+        return job
+
+    async def ingest_qa(
+        self,
+        db: AsyncSession,
+        customer_id: uuid.UUID,
+        site_id: str,
+        question: str,
+        answer: str,
+    ) -> IngestionJob:
+        """
+        Ingest a Q&A seed pair as a knowledge chunk.
+
+        Args:
+            db: Database session
+            customer_id: Customer UUID
+            site_id: Customer site ID (Pinecone namespace)
+            question: The question
+            answer: The answer
+
+        Returns:
+            IngestionJob record
+        """
+        job = IngestionJob(
+            customer_id=customer_id,
+            source_type="qa_seed",
+            source_filename=f"QA: {question[:80]}",
+            status="processing",
+            started_at=datetime.utcnow(),
+        )
+        db.add(job)
+        await db.commit()
+        await db.refresh(job)
+
+        try:
+            # Combine Q&A into a single text block
+            text = f"Q: {question}\nA: {answer}"
+
+            # Chunk normally (most QA pairs will be a single chunk)
+            chunks = chunk_text(text)
+            for chunk in chunks:
+                chunk["source_title"] = f"QA: {question[:80]}"
+
+            if chunks:
+                await self._process_chunks(
+                    db=db,
+                    job=job,
+                    site_id=site_id,
+                    chunks=chunks,
+                )
+
+            job.status = "completed"
+            job.chunks_created = len(chunks)
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+            logger.info("QA seed ingested: %d chunks for site %s", len(chunks), site_id)
 
         except Exception as e:
             job.status = "failed"

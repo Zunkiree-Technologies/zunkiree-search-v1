@@ -1,5 +1,6 @@
 import time
 import hashlib
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -9,6 +10,8 @@ from app.services.vector_store import get_vector_store_service
 from app.services.llm import get_llm_service
 from app.utils.chunking import count_tokens
 from app.config import get_settings
+
+logger = logging.getLogger("zunkiree.query.service")
 
 settings = get_settings()
 
@@ -60,6 +63,9 @@ class QueryService:
         # Generate query embedding
         query_embedding = await self.embedding_service.create_embedding(question)
 
+        # [TEMP-LOG] Log Pinecone query params
+        logger.warning("[QUERY-TRACE] pinecone_namespace=%s site_id_filter=%s top_k=%s embedding_dim=%d", site_id, site_id, settings.top_k_chunks, len(query_embedding))
+
         # Retrieve relevant vector IDs from Pinecone (scores only, no metadata)
         vector_matches = await self.vector_store.query_vectors(
             query_vector=query_embedding,
@@ -71,9 +77,14 @@ class QueryService:
         # Extract vector IDs
         vector_ids = [match["id"] for match in vector_matches]
 
+        # [TEMP-LOG] Log Pinecone results
+        logger.warning("[QUERY-TRACE] pinecone_matches=%d vector_ids=%s", len(vector_matches), vector_ids[:5])
+
         # No-data detection: if Pinecone returned 0 results, return fallback immediately
         if not vector_ids:
             fallback = config.fallback_message if config else "I don't have that information yet."
+            # [TEMP-LOG] Fallback: 0 Pinecone matches
+            logger.warning("[QUERY-TRACE] FALLBACK_TRIGGERED reason=zero_pinecone_matches site_id=%s", site_id)
             return {
                 "answer": fallback,
                 "suggestions": [],
@@ -82,6 +93,11 @@ class QueryService:
 
         # Fetch full chunk content from PostgreSQL (defense-in-depth: filter by customer_id)
         db_chunks = await self._fetch_chunks_by_vector_ids(db, vector_ids, customer.id)
+
+        # [TEMP-LOG] Log Postgres chunk fetch results
+        logger.warning("[QUERY-TRACE] postgres_chunks=%d customer_id=%s vector_ids_requested=%d", len(db_chunks), customer.id, len(vector_ids))
+        if len(db_chunks) < len(vector_ids):
+            logger.warning("[QUERY-TRACE] CHUNK_MISMATCH missing_count=%d (Pinecone returned IDs not found in Postgres)", len(vector_ids) - len(db_chunks))
 
         # Build ordered chunk list preserving Pinecone relevance ranking
         vector_id_to_score = {match["id"]: match["score"] for match in vector_matches}

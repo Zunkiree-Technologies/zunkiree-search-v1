@@ -1,4 +1,5 @@
 import json
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -7,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.services.query import get_query_service
 from app.config import get_settings
+
+logger = logging.getLogger("zunkiree.query.api")
 
 router = APIRouter(prefix="/query", tags=["query"])
 settings = get_settings()
@@ -46,6 +49,9 @@ async def submit_query(
     The answer is generated using RAG (Retrieval-Augmented Generation)
     based on the customer's indexed data.
     """
+    # [TEMP-LOG] Log incoming request
+    logger.warning("[QUERY-TRACE] site_id=%s question=%r origin=%s", query.site_id, query.question[:80], request.headers.get("origin"))
+
     # Validate: reject empty questions
     if not query.question or not query.question.strip():
         raise HTTPException(
