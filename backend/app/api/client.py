@@ -1,16 +1,18 @@
 from __future__ import annotations
 
+import secrets
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import Customer, WidgetConfig, IngestionJob
+from app.models import Customer, WidgetConfig, IngestionJob, DocumentChunk
 from app.services.auth import verify_password, create_access_token, decode_access_token
 from app.services.ingestion import get_ingestion_service
+from app.utils.extractors import SUPPORTED_EXTENSIONS, SIZE_LIMITS, validate_file, get_file_category
 from app.config import get_settings
 
 router = APIRouter(prefix="/client", tags=["client"])
@@ -122,6 +124,21 @@ class ConfigResponse(BaseModel):
     show_suggestions: bool | None
 
 
+class ApiKeyResponse(BaseModel):
+    api_key_masked: str
+    has_openai_key: bool
+    openai_key_masked: str | None
+
+
+class UpdateOpenAIKeyRequest(BaseModel):
+    openai_api_key: str = Field(..., min_length=10)
+
+
+class RegenerateApiKeyResponse(BaseModel):
+    api_key: str
+    message: str
+
+
 # --- Endpoints ---
 
 @router.post("/login", response_model=LoginResponse)
@@ -168,6 +185,64 @@ async def get_profile(
         site_id=customer.site_id,
         email=customer.email,
         created_at=customer.created_at.isoformat(),
+    )
+
+
+@router.get("/api-keys", response_model=ApiKeyResponse)
+async def get_api_keys(
+    customer: Customer = Depends(get_current_customer),
+):
+    """Get masked API keys for the current customer."""
+    key = customer.api_key
+    masked = key[:7] + "..." + key[-4:] if len(key) > 11 else key[:4] + "..."
+
+    openai_masked = None
+    if customer.openai_api_key:
+        ok = customer.openai_api_key
+        openai_masked = ok[:7] + "..." + ok[-4:] if len(ok) > 11 else ok[:4] + "..."
+
+    return ApiKeyResponse(
+        api_key_masked=masked,
+        has_openai_key=customer.openai_api_key is not None,
+        openai_key_masked=openai_masked,
+    )
+
+
+@router.put("/api-keys/openai")
+async def update_openai_key(
+    request: UpdateOpenAIKeyRequest,
+    customer: Customer = Depends(get_current_customer),
+    db: AsyncSession = Depends(get_db),
+):
+    """Save or update customer's OpenAI API key."""
+    customer.openai_api_key = request.openai_api_key
+    await db.commit()
+    return {"message": "OpenAI API key saved successfully"}
+
+
+@router.delete("/api-keys/openai")
+async def delete_openai_key(
+    customer: Customer = Depends(get_current_customer),
+    db: AsyncSession = Depends(get_db),
+):
+    """Remove customer's OpenAI API key (reverts to platform key)."""
+    customer.openai_api_key = None
+    await db.commit()
+    return {"message": "OpenAI API key removed. Platform key will be used."}
+
+
+@router.post("/api-keys/regenerate", response_model=RegenerateApiKeyResponse)
+async def regenerate_api_key(
+    customer: Customer = Depends(get_current_customer),
+    db: AsyncSession = Depends(get_db),
+):
+    """Regenerate the client API key. The full key is returned once."""
+    new_key = f"zk_live_{secrets.token_hex(24)}"
+    customer.api_key = new_key
+    await db.commit()
+    return RegenerateApiKeyResponse(
+        api_key=new_key,
+        message="API key regenerated. Copy it now — it won't be shown again.",
     )
 
 
@@ -230,6 +305,61 @@ async def ingest_text(
             status_code=500,
             detail={"code": "INGESTION_FAILED", "message": str(e)},
         )
+
+
+@router.post("/ingest/file", response_model=JobResponse)
+async def ingest_file(
+    file: UploadFile = File(...),
+    customer: Customer = Depends(get_current_customer),
+    db: AsyncSession = Depends(get_db),
+):
+    """Ingest content from an uploaded file (PDF, Word, Excel, images, audio, video)."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No filename provided")
+
+    # Read file content
+    file_content = await file.read()
+
+    # Validate file type and size
+    is_valid, error_msg = validate_file(file.filename, len(file_content))
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+
+    ingestion_service = get_ingestion_service()
+
+    try:
+        job = await ingestion_service.ingest_file(
+            db=db,
+            customer_id=customer.id,
+            site_id=customer.site_id,
+            file_content=file_content,
+            filename=file.filename,
+            openai_api_key=customer.openai_api_key,
+        )
+
+        return JobResponse(
+            job_id=str(job.id),
+            status=job.status,
+            message=f"Ingestion completed. {job.chunks_created} chunks created.",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "INGESTION_FAILED", "message": str(e)},
+        )
+
+
+@router.get("/ingest/supported-types")
+async def get_supported_types():
+    """Return supported file extensions grouped by category."""
+    categories: dict[str, list[str]] = {}
+    for ext, category in SUPPORTED_EXTENSIONS.items():
+        categories.setdefault(category, []).append(ext)
+
+    return {
+        "categories": categories,
+        "size_limits": {k: v // (1024 * 1024) for k, v in SIZE_LIMITS.items()},
+    }
 
 
 @router.get("/jobs", response_model=JobsListResponse)
@@ -342,6 +472,54 @@ async def update_config(
         show_sources=config.show_sources,
         show_suggestions=config.show_suggestions,
     )
+
+
+@router.get("/knowledge")
+async def list_knowledge(
+    search: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    customer: Customer = Depends(get_current_customer),
+    db: AsyncSession = Depends(get_db),
+):
+    """List document chunks in the knowledge base for the current customer."""
+    query = select(DocumentChunk).where(DocumentChunk.customer_id == customer.id)
+
+    if search:
+        query = query.where(
+            DocumentChunk.content_preview.ilike(f"%{search}%")
+            | DocumentChunk.source_title.ilike(f"%{search}%")
+        )
+
+    # Get total count
+    from sqlalchemy import func
+    count_query = select(func.count()).select_from(
+        query.subquery()
+    )
+    total_result = await db.execute(count_query)
+    total = total_result.scalar()
+
+    query = query.order_by(DocumentChunk.created_at.desc())
+    query = query.offset(offset).limit(limit)
+
+    result = await db.execute(query)
+    chunks = result.scalars().all()
+
+    return {
+        "chunks": [
+            {
+                "id": str(chunk.id),
+                "source_title": chunk.source_title,
+                "source_url": chunk.source_url,
+                "content_preview": chunk.content_preview,
+                "chunk_index": chunk.chunk_index,
+                "token_count": chunk.token_count,
+                "created_at": chunk.created_at.isoformat(),
+            }
+            for chunk in chunks
+        ],
+        "total": total,
+    }
 
 
 @router.get("/embed-code")

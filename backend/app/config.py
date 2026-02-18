@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     api_secret_key: str = "change-this-in-production"
     jwt_secret_key: str = "change-this-jwt-secret-in-production"
     allowed_origins: str = "http://localhost:3000,http://localhost:5173"
+    client_admin_url: str = "http://localhost:5173"
 
     # Query settings
     max_query_length: int = 500

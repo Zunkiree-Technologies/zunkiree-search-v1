@@ -20,6 +20,7 @@ class Customer(Base):
     api_key: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     email: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True, index=True)
     password_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    openai_api_key: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -30,6 +31,7 @@ class Customer(Base):
     ingestion_jobs: Mapped[list["IngestionJob"]] = relationship(back_populates="customer", cascade="all, delete-orphan")
     document_chunks: Mapped[list["DocumentChunk"]] = relationship(back_populates="customer", cascade="all, delete-orphan")
     query_logs: Mapped[list["QueryLog"]] = relationship(back_populates="customer", cascade="all, delete-orphan")
+    connectors: Mapped[list["Connector"]] = relationship(back_populates="customer", cascade="all, delete-orphan")
 
 
 # Import at bottom to avoid circular imports
@@ -37,3 +39,4 @@ from app.models.domain import Domain
 from app.models.widget_config import WidgetConfig
 from app.models.ingestion import IngestionJob, DocumentChunk
 from app.models.query_log import QueryLog
+from app.models.connector import Connector

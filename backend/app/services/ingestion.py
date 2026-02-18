@@ -10,6 +10,7 @@ from app.services.embeddings import get_embedding_service
 from app.services.vector_store import get_vector_store_service
 from app.utils.chunking import chunk_text
 from app.utils.crawling import crawl_url, extract_text_from_pdf
+from app.utils.extractors import extract_text, get_file_category
 
 
 class IngestionService:
@@ -229,6 +230,64 @@ class IngestionService:
                 )
 
             # Update job status
+            job.status = "completed"
+            job.chunks_created = len(chunks)
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+
+        except Exception as e:
+            job.status = "failed"
+            job.error_message = str(e)
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+            raise
+
+        return job
+
+    async def ingest_file(
+        self,
+        db: AsyncSession,
+        customer_id: uuid.UUID,
+        site_id: str,
+        file_content: bytes,
+        filename: str,
+        openai_api_key: str | None = None,
+    ) -> IngestionJob:
+        """
+        Ingest content from any supported file type.
+
+        Routes to the appropriate text extractor based on file extension,
+        then feeds into the standard chunk → embed → store pipeline.
+        """
+        category = get_file_category(filename) or "file"
+
+        job = IngestionJob(
+            customer_id=customer_id,
+            source_type=category,
+            source_filename=filename,
+            status="processing",
+            started_at=datetime.utcnow(),
+        )
+        db.add(job)
+        await db.commit()
+        await db.refresh(job)
+
+        try:
+            text = await extract_text(file_content, filename, openai_api_key=openai_api_key)
+
+            chunks = chunk_text(text)
+
+            for chunk in chunks:
+                chunk["source_title"] = filename
+
+            if chunks:
+                await self._process_chunks(
+                    db=db,
+                    job=job,
+                    site_id=site_id,
+                    chunks=chunks,
+                )
+
             job.status = "completed"
             job.chunks_created = len(chunks)
             job.completed_at = datetime.utcnow()

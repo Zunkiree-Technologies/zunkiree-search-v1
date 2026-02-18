@@ -757,6 +757,381 @@
       font-size: 13px;
       color: #6b7280;
     }
+
+    /* File Upload / Drop Zone */
+    .drop-zone {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+    .drop-zone:hover {
+      border-color: #2563eb;
+      background: #f0f4ff;
+    }
+    .drop-zone.drag-over {
+      border-color: #2563eb;
+      background: #eff6ff;
+      border-style: solid;
+    }
+    .drop-zone-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      color: #9ca3af;
+    }
+    .drop-zone-text {
+      font-size: 15px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+    .drop-zone-hint {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .file-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      margin-top: 16px;
+    }
+    .file-preview-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+    .file-preview-icon.document { background: #dbeafe; }
+    .file-preview-icon.image { background: #dcfce7; }
+    .file-preview-icon.audio { background: #fef3c7; }
+    .file-preview-icon.video { background: #fce7f3; }
+    .file-preview-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .file-preview-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-preview-meta {
+      font-size: 12px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .file-category-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .file-category-badge.document { background: #dbeafe; color: #1e40af; }
+    .file-category-badge.image { background: #dcfce7; color: #166534; }
+    .file-category-badge.audio { background: #fef3c7; color: #92400e; }
+    .file-category-badge.video { background: #fce7f3; color: #9d174d; }
+    .file-preview-remove {
+      background: transparent;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      color: #9ca3af;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .file-preview-remove:hover {
+      color: #ef4444;
+      background: #fee2e2;
+    }
+
+    /* Integrations Grid */
+    .integrations-search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      background: #fafafa;
+    }
+    .integrations-search svg {
+      width: 18px;
+      height: 18px;
+      color: #9ca3af;
+      flex-shrink: 0;
+    }
+    .integrations-search input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 14px;
+      color: #111;
+      width: 100%;
+      padding: 0;
+    }
+    .integrations-search input::placeholder {
+      color: #9ca3af;
+    }
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      padding: 6px 14px;
+      border-radius: 50px;
+      background: #f3f4f6;
+      color: #374151;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      background: #e5e7eb;
+    }
+    .category-tab.active {
+      background: #111;
+      color: white;
+    }
+    .connected-section {
+      margin-bottom: 28px;
+    }
+    .connected-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .app-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      transition: all 0.15s;
+      background: white;
+    }
+    .app-card:hover {
+      border-color: #d1d5db;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .app-card.connected {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+    .app-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      overflow: hidden;
+    }
+    .app-card-icon img {
+      width: 24px;
+      height: 24px;
+    }
+    .app-card-icon .fallback-icon {
+      font-size: 20px;
+    }
+    .app-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .app-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111;
+    }
+    .app-card-desc {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .app-card-account {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #374151;
+      margin-top: 4px;
+    }
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .connection-dot.green { background: #22c55e; }
+    .connection-dot.red { background: #ef4444; }
+    .connection-dot.gray { background: #9ca3af; }
+    .app-card-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .connect-btn {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .connect-btn:hover {
+      background: #333;
+    }
+    .connect-btn.coming-soon {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+    .connect-btn.coming-soon:hover {
+      background: #e5e7eb;
+    }
+    .disconnect-btn {
+      background: transparent;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .disconnect-btn:hover {
+      background: #fef2f2;
+    }
+    .sync-btn {
+      background: transparent;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .sync-btn:hover {
+      background: #eff6ff;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.hidden {
+      display: none !important;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      padding: 6px;
+      cursor: pointer;
+      color: #6b7280;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+    }
+    .modal-close:hover {
+      background: #f3f4f6;
+      color: #111;
+    }
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 2000;
+      animation: toast-in 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .toast.success { background: #dcfce7; color: #166534; }
+    .toast.error { background: #fee2e2; color: #991b1b; }
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -859,6 +1234,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
           <span>Ingestion Jobs</span>
         </button>
+        <button class="nav-item" onclick="showSection('knowledge')" data-section="knowledge" title="Knowledge Base">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+          <span>Knowledge Base</span>
+        </button>
         <button class="nav-item" onclick="showSection('widget')" data-section="widget" title="Widget Config">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           <span>Widget Config</span>
@@ -866,6 +1245,10 @@
         <button class="nav-item" onclick="showSection('embed')" data-section="embed" title="Embed Code">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>
           <span>Embed Code</span>
+        </button>
+        <button class="nav-item" onclick="showSection('connectors')" data-section="connectors" title="Integrations">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" /></svg>
+          <span>Integrations</span>
         </button>
       </div>
       <div class="sidebar-footer">
@@ -927,6 +1310,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                 Add Text
               </button>
+              <button class="newtask-chip" onclick="showSection('ingest'); showIngestTab('file');">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                Upload File
+              </button>
               <button class="newtask-chip" onclick="showSection('widget')">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 Configure Widget
@@ -934,6 +1321,10 @@
               <button class="newtask-chip" onclick="showSection('embed')">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>
                 Get Embed Code
+              </button>
+              <button class="newtask-chip" onclick="showSection('connectors')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" /></svg>
+                Connect App
               </button>
             </div>
           </div>
@@ -943,12 +1334,14 @@
         <div id="section-ingest" class="section">
           <div class="section-header">
             <h1 class="section-title">Ingest Data</h1>
-            <p class="section-subtitle">Add content to your knowledge base via URL or text</p>
+            <p class="section-subtitle">Add content to your knowledge base via URL, text, or file upload. Manage API keys.</p>
           </div>
           <div class="section-card">
             <div class="tabs">
-              <button class="tab active" onclick="showIngestTab('url')">URL</button>
-              <button class="tab" onclick="showIngestTab('text')">Text</button>
+              <button class="tab active" onclick="showIngestTab('url')" data-ingest-tab="url">URL</button>
+              <button class="tab" onclick="showIngestTab('text')" data-ingest-tab="text">Text</button>
+              <button class="tab" onclick="showIngestTab('file')" data-ingest-tab="file">Files</button>
+              <button class="tab" onclick="showIngestTab('apikeys')" data-ingest-tab="apikeys">API Keys</button>
             </div>
             <form id="ingestUrlForm">
               <div class="form-group">
@@ -972,6 +1365,60 @@
               </div>
               <button type="submit">Ingest Text</button>
             </form>
+            <div id="ingestFileForm" class="hidden">
+              <div id="fileDropZone" class="drop-zone">
+                <svg class="drop-zone-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                <div class="drop-zone-text">Drop files here or click to browse</div>
+                <div class="drop-zone-hint">PDF, Word, Excel, PowerPoint, CSV, TXT, images, audio, video</div>
+                <input type="file" id="fileInput" style="display: none;" accept=".pdf,.docx,.pptx,.xlsx,.csv,.txt,.md,.json,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.mp3,.wav,.m4a,.ogg,.flac,.webm,.mp4,.mov">
+              </div>
+              <div id="filePreview" class="hidden"></div>
+              <div class="btn-group">
+                <button type="button" id="uploadFileBtn" onclick="uploadFile()" disabled>Upload File</button>
+              </div>
+            </div>
+            <div id="ingestApiKeysForm" class="hidden">
+              <!-- Client API Key -->
+              <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #111; margin-bottom: 4px;">Client API Key</h3>
+                <p style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">Use this key for programmatic API access (e.g. ingestion via curl).</p>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="text" id="clientApiKeyDisplay" readonly style="flex: 1; background: #f9fafb; font-family: monospace; font-size: 13px;" value="Loading...">
+                  <button type="button" onclick="copyClientApiKey()" style="font-size: 13px; padding: 10px 16px; white-space: nowrap;">Copy</button>
+                </div>
+                <div id="clientApiKeyFull" class="hidden" style="margin-top: 10px;">
+                  <div class="alert success" style="margin-bottom: 8px; font-size: 13px;">New key generated. Copy it now — it won't be shown again.</div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" id="clientApiKeyFullValue" readonly style="flex: 1; background: #f0fdf4; border-color: #86efac; font-family: monospace; font-size: 13px;">
+                    <button type="button" onclick="copyNewClientApiKey()" style="font-size: 13px; padding: 10px 16px; white-space: nowrap;">Copy</button>
+                  </div>
+                </div>
+                <div style="margin-top: 10px;">
+                  <button type="button" onclick="regenerateApiKey()" style="background: #dc2626; font-size: 13px; padding: 8px 16px;">Regenerate Key</button>
+                </div>
+              </div>
+              <!-- Third-Party Keys -->
+              <div style="border-top: 1px solid #e5e7eb; padding-top: 24px;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #111; margin-bottom: 4px;">Third-Party Keys</h3>
+                <p style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">Provide your own OpenAI key for image, audio, and video file extraction. If not set, the platform key is used.</p>
+                <div id="openaiKeyStatus" style="font-size: 13px; color: #6b7280; margin-bottom: 10px;"></div>
+                <div style="margin-bottom: 10px; position: relative;">
+                  <label style="margin-bottom: 6px;">OpenAI API Key</label>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="position: relative; flex: 1;">
+                      <input type="password" id="openaiKeyInput" placeholder="sk-..." style="width: 100%; padding-right: 40px; font-family: monospace; font-size: 13px;">
+                      <button type="button" onclick="toggleOpenAIKeyVisibility()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 4px; cursor: pointer; color: #6b7280; display: flex; align-items: center;" title="Toggle visibility">
+                        <svg id="openaiKeyEyeIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="btn-group" style="margin-top: 12px;">
+                  <button type="button" onclick="saveOpenAIKey()">Save Key</button>
+                  <button type="button" class="secondary" onclick="removeOpenAIKey()">Remove Key</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -986,6 +1433,24 @@
               <button onclick="loadJobs()" style="font-size: 13px; padding: 8px 16px;">Refresh</button>
             </div>
             <div id="jobsList"><p style="color: #6b7280; text-align: center; padding: 20px;">Loading...</p></div>
+          </div>
+        </div>
+
+        <!-- Knowledge Base Section -->
+        <div id="section-knowledge" class="section">
+          <div class="section-header">
+            <h1 class="section-title">Knowledge Base</h1>
+            <p class="section-subtitle">View and manage your ingested content chunks</p>
+          </div>
+          <div class="section-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div style="font-size: 14px; color: #6b7280;" id="knowledgeCount">0 chunks</div>
+              <button onclick="loadKnowledge()" style="font-size: 13px; padding: 8px 16px;">Refresh</button>
+            </div>
+            <div id="knowledgeSearch" style="margin-bottom: 16px;">
+              <input type="text" id="knowledgeSearchInput" placeholder="Search chunks..." oninput="filterKnowledge(this.value)" style="width: 100%;">
+            </div>
+            <div id="knowledgeList"><p style="color: #6b7280; text-align: center; padding: 20px;">Loading...</p></div>
           </div>
         </div>
 
@@ -1038,6 +1503,30 @@
           </div>
         </div>
 
+        <!-- Integrations Section -->
+        <div id="section-connectors" class="section" style="max-width: 960px;">
+          <div class="section-header">
+            <h1 class="section-title">Integrations</h1>
+            <p class="section-subtitle">Connect third-party apps to sync data into your knowledge base</p>
+          </div>
+
+          <div class="integrations-search">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+            <input type="text" id="integrationsSearchInput" placeholder="Search integrations..." oninput="filterApps(this.value)">
+          </div>
+
+          <div id="connectedSection" class="connected-section" style="display: none;">
+            <div class="connected-section-title">Connected</div>
+            <div id="connectedGrid" class="app-grid"></div>
+          </div>
+
+          <div id="categoryTabs" class="category-tabs"></div>
+
+          <div id="appsGrid" class="app-grid">
+            <p style="color: #6b7280; text-align: center; padding: 20px; grid-column: 1/-1;">Loading...</p>
+          </div>
+        </div>
+
         <!-- Profile Section -->
         <div id="section-profile" class="section">
           <div class="section-header">
@@ -1068,7 +1557,7 @@
   </div>
 
   <script>
-    const API_URL = 'http://localhost:8001';
+    const API_URL = 'http://localhost:8000';
     const TOKEN_KEY = 'zunkiree_client_token';
 
     // --- Token management ---
@@ -1232,11 +1721,14 @@
 
     // --- Dashboard load ---
     async function loadDashboard() {
+      handleOAuthReturn();
       await Promise.all([
         loadProfile(),
         loadConfig(),
         loadJobs(),
+        loadKnowledge(),
         loadEmbedCode(),
+        loadApps(),
       ]);
     }
 
@@ -1433,21 +1925,570 @@
       });
     }
 
+    // --- Knowledge Base ---
+    let allChunks = [];
+
+    async function loadKnowledge() {
+      try {
+        const res = await apiCall('/api/v1/client/knowledge');
+        const data = await res.json();
+        if (res.ok) {
+          allChunks = data.chunks;
+          document.getElementById('knowledgeCount').textContent = `${data.total} chunk${data.total !== 1 ? 's' : ''}`;
+          renderKnowledge(allChunks);
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          document.getElementById('knowledgeList').innerHTML = '<p style="color: #991b1b; text-align: center; padding: 20px;">Failed to load knowledge base</p>';
+        }
+      }
+    }
+
+    function renderKnowledge(chunks) {
+      const list = document.getElementById('knowledgeList');
+      if (chunks.length === 0) {
+        list.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No chunks found</p>';
+        return;
+      }
+      list.innerHTML = chunks.map(chunk => `
+        <div class="job-item">
+          <div class="job-header">
+            <span style="font-weight: 500;">${chunk.source_title || 'Untitled'}</span>
+            <span class="job-status completed">Chunk #${chunk.chunk_index}</span>
+          </div>
+          <div style="font-size: 13px; color: #374151; margin-top: 8px; line-height: 1.5; white-space: pre-wrap; max-height: 80px; overflow: hidden;">${(chunk.content_preview || '').replace(/</g, '&lt;')}</div>
+          <div class="job-details" style="display: flex; gap: 16px; margin-top: 6px;">
+            ${chunk.source_url ? `<span>Source: ${chunk.source_url}</span>` : ''}
+            ${chunk.token_count ? `<span>Tokens: ${chunk.token_count}</span>` : ''}
+            <span>${new Date(chunk.created_at).toLocaleString()}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterKnowledge(query) {
+      if (!query) {
+        renderKnowledge(allChunks);
+        return;
+      }
+      const q = query.toLowerCase();
+      const filtered = allChunks.filter(c =>
+        (c.content_preview || '').toLowerCase().includes(q) ||
+        (c.source_title || '').toLowerCase().includes(q) ||
+        (c.source_url || '').toLowerCase().includes(q)
+      );
+      renderKnowledge(filtered);
+    }
+
     // --- Tab switching ---
     function showIngestTab(tab) {
-      document.querySelectorAll('.tabs .tab').forEach(t => {
-        t.classList.remove('active');
-        if ((tab === 'url' && t.textContent === 'URL') || (tab === 'text' && t.textContent === 'Text')) {
-          t.classList.add('active');
+      document.querySelectorAll('[data-ingest-tab]').forEach(t => {
+        t.classList.toggle('active', t.dataset.ingestTab === tab);
+      });
+
+      document.getElementById('ingestUrlForm').classList.toggle('hidden', tab !== 'url');
+      document.getElementById('ingestTextForm').classList.toggle('hidden', tab !== 'text');
+      document.getElementById('ingestFileForm').classList.toggle('hidden', tab !== 'file');
+      document.getElementById('ingestApiKeysForm').classList.toggle('hidden', tab !== 'apikeys');
+
+      if (tab === 'apikeys') {
+        loadApiKeys();
+      }
+    }
+
+    // --- API Keys ---
+    async function loadApiKeys() {
+      try {
+        const res = await apiCall('/api/v1/client/api-keys');
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('clientApiKeyDisplay').value = data.api_key_masked;
+          const statusEl = document.getElementById('openaiKeyStatus');
+          if (data.has_openai_key) {
+            statusEl.innerHTML = `<span style="color: #166534;">Current key: <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${data.openai_key_masked}</code></span>`;
+          } else {
+            statusEl.innerHTML = '<span style="color: #6b7280;">No key set — using platform key</span>';
+          }
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          showAlert('Failed to load API keys', 'error');
+        }
+      }
+    }
+
+    function copyClientApiKey() {
+      const val = document.getElementById('clientApiKeyDisplay').value;
+      navigator.clipboard.writeText(val).then(() => {
+        showAlert('Masked key copied to clipboard', 'success');
+      });
+    }
+
+    function copyNewClientApiKey() {
+      const val = document.getElementById('clientApiKeyFullValue').value;
+      navigator.clipboard.writeText(val).then(() => {
+        showAlert('New API key copied to clipboard', 'success');
+      });
+    }
+
+    async function regenerateApiKey() {
+      if (!confirm('Are you sure you want to regenerate your API key? The old key will stop working immediately.')) {
+        return;
+      }
+
+      try {
+        const res = await apiCall('/api/v1/client/api-keys/regenerate', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('clientApiKeyFullValue').value = data.api_key;
+          document.getElementById('clientApiKeyFull').classList.remove('hidden');
+          // Refresh the masked display
+          loadApiKeys();
+        } else {
+          showAlert(data.detail || 'Failed to regenerate key', 'error');
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          showAlert('Network error', 'error');
+        }
+      }
+    }
+
+    async function saveOpenAIKey() {
+      const key = document.getElementById('openaiKeyInput').value.trim();
+      if (!key || key.length < 10) {
+        showAlert('Please enter a valid OpenAI API key (at least 10 characters)', 'error');
+        return;
+      }
+
+      try {
+        const res = await apiCall('/api/v1/client/api-keys/openai', {
+          method: 'PUT',
+          body: { openai_api_key: key },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert(data.message, 'success');
+          document.getElementById('openaiKeyInput').value = '';
+          loadApiKeys();
+        } else {
+          showAlert(data.detail?.message || data.detail || 'Failed to save key', 'error');
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          showAlert('Network error', 'error');
+        }
+      }
+    }
+
+    async function removeOpenAIKey() {
+      if (!confirm('Remove your OpenAI API key? The platform key will be used instead.')) {
+        return;
+      }
+
+      try {
+        const res = await apiCall('/api/v1/client/api-keys/openai', { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert(data.message, 'success');
+          loadApiKeys();
+        } else {
+          showAlert(data.detail || 'Failed to remove key', 'error');
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          showAlert('Network error', 'error');
+        }
+      }
+    }
+
+    function toggleOpenAIKeyVisibility() {
+      const input = document.getElementById('openaiKeyInput');
+      const icon = document.getElementById('openaiKeyEyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />';
+      } else {
+        input.type = 'password';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />';
+      }
+    }
+
+    // --- Integrations ---
+    let allApps = [];
+    let activeCategory = 'All';
+    let searchQuery = '';
+
+    async function loadApps() {
+      try {
+        const res = await apiCall('/api/v1/client/connectors/apps');
+        const data = await res.json();
+        if (res.ok) {
+          allApps = data.apps;
+          renderCategoryTabs(data.categories);
+          renderApps();
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          document.getElementById('appsGrid').innerHTML = '<p style="color: #991b1b; text-align: center; padding: 20px; grid-column: 1/-1;">Failed to load integrations</p>';
+        }
+      }
+    }
+
+    function renderCategoryTabs(categories) {
+      const container = document.getElementById('categoryTabs');
+      const tabs = ['All', ...categories];
+      container.innerHTML = tabs.map(cat =>
+        `<button class="category-tab${cat === activeCategory ? ' active' : ''}" onclick="setCategory('${cat.replace(/'/g, "\\'")}')">${cat}</button>`
+      ).join('');
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.category-tab').forEach(t => {
+        t.classList.toggle('active', t.textContent === cat);
+      });
+      renderApps();
+    }
+
+    function filterApps(query) {
+      searchQuery = query.toLowerCase();
+      renderApps();
+    }
+
+    function renderApps() {
+      const connectedGrid = document.getElementById('connectedGrid');
+      const connectedSection = document.getElementById('connectedSection');
+      const appsGrid = document.getElementById('appsGrid');
+
+      // Collect all connected apps
+      let connectedCards = [];
+      let availableCards = [];
+
+      allApps.forEach(app => {
+        // Filter by category
+        if (activeCategory !== 'All' && app.category !== activeCategory) return;
+
+        // Filter by search query
+        if (searchQuery) {
+          const nameMatch = app.display_name.toLowerCase().includes(searchQuery);
+          const descMatch = app.description.toLowerCase().includes(searchQuery);
+          const accountMatch = app.connections.some(c =>
+            (c.external_account_name || '').toLowerCase().includes(searchQuery)
+          );
+          if (!nameMatch && !descMatch && !accountMatch) return;
+        }
+
+        // Render connected instances
+        app.connections.forEach(conn => {
+          connectedCards.push(renderConnectedCard(app, conn));
+        });
+
+        // Render available app card
+        availableCards.push(renderAppCard(app));
+      });
+
+      // Connected section
+      if (connectedCards.length > 0) {
+        connectedSection.style.display = '';
+        connectedGrid.innerHTML = connectedCards.join('');
+      } else {
+        connectedSection.style.display = 'none';
+        connectedGrid.innerHTML = '';
+      }
+
+      // Available apps
+      if (availableCards.length > 0) {
+        appsGrid.innerHTML = availableCards.join('');
+      } else {
+        appsGrid.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px; grid-column: 1/-1;">No apps match your search</p>';
+      }
+    }
+
+    function renderConnectedCard(app, connection) {
+      const dotClass = connection.connection_status === 'connected' ? 'green' :
+                       connection.connection_status === 'error' ? 'red' : 'gray';
+      const accountLabel = connection.external_account_name || connection.display_name;
+      const syncBtn = connection.is_syncable
+        ? `<button class="sync-btn" onclick="syncConnector('${connection.id}')">Sync</button>`
+        : '';
+      const statusTip = connection.status_message ? ` title="${connection.status_message}"` : '';
+
+      return `
+        <div class="app-card connected">
+          <div class="app-card-icon">
+            ${app.icon ? `<img src="${app.icon}" alt="${app.display_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="fallback-icon" style="display:none">${app.display_name[0]}</span>` : `<span class="fallback-icon">${app.display_name[0]}</span>`}
+          </div>
+          <div class="app-card-info">
+            <div class="app-card-name">${app.display_name}</div>
+            <div class="app-card-account"${statusTip}>
+              <span class="connection-dot ${dotClass}"></span>
+              ${accountLabel}
+            </div>
+          </div>
+          <div class="app-card-actions">
+            ${syncBtn}
+            <button class="disconnect-btn" onclick="disconnectApp('${connection.id}', '${app.display_name.replace(/'/g, "\\'")}')">Disconnect</button>
+          </div>
+        </div>`;
+    }
+
+    function renderAppCard(app) {
+      let actionBtn;
+      if (app.provider_id === 'custom') {
+        actionBtn = `<button class="connect-btn" onclick="connectCustomApp()">Add</button>`;
+      } else if (!app.is_connectable) {
+        actionBtn = `<button class="connect-btn coming-soon" disabled>Coming Soon</button>`;
+      } else if (app.connections.length > 0) {
+        actionBtn = `<button class="connect-btn" onclick="connectApp('${app.provider_id}')">+ Add Account</button>`;
+      } else {
+        actionBtn = `<button class="connect-btn" onclick="connectApp('${app.provider_id}')">Connect</button>`;
+      }
+
+      return `
+        <div class="app-card">
+          <div class="app-card-icon">
+            ${app.icon ? `<img src="${app.icon}" alt="${app.display_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="fallback-icon" style="display:none">${app.display_name[0]}</span>` : `<span class="fallback-icon">${app.display_name[0]}</span>`}
+          </div>
+          <div class="app-card-info">
+            <div class="app-card-name">${app.display_name}</div>
+            <div class="app-card-desc">${app.description}</div>
+          </div>
+          <div class="app-card-actions">
+            ${actionBtn}
+          </div>
+        </div>`;
+    }
+
+    async function connectApp(providerId) {
+      try {
+        const res = await apiCall(`/api/v1/client/connectors/oauth/${providerId}/authorize`);
+        const data = await res.json();
+        if (res.ok) {
+          // Redirect the browser to the OAuth provider
+          window.location.href = data.authorization_url;
+        } else {
+          showAlert(data.detail || 'Failed to start connection', 'error');
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          showAlert('Network error', 'error');
+        }
+      }
+    }
+
+    function connectCustomApp() {
+      // For custom connectors, keep simple prompt-based flow
+      const name = prompt('Enter a name for this custom connector:');
+      if (!name) return;
+      const key = prompt('Enter credential key (e.g. api_key):');
+      if (!key) return;
+      const value = prompt('Enter credential value:');
+      if (!value) return;
+
+      apiCall('/api/v1/client/connectors/', {
+        method: 'POST',
+        body: { app_name: 'custom', display_name: name, credentials: { [key]: value } },
+      }).then(res => res.json()).then(data => {
+        if (data.id) {
+          showAlert('Custom connector created', 'success');
+          loadApps();
+        } else {
+          showAlert(data.detail || 'Failed to create connector', 'error');
+        }
+      }).catch(() => showAlert('Network error', 'error'));
+    }
+
+    async function disconnectApp(connectorId, appName) {
+      if (!confirm(`Disconnect ${appName}? This will remove the connection.`)) return;
+
+      try {
+        const res = await apiCall(`/api/v1/client/connectors/${connectorId}/disconnect`, { method: 'POST' });
+        if (res.ok) {
+          showAlert(`${appName} disconnected`, 'success');
+          loadApps();
+        } else {
+          const data = await res.json();
+          showAlert(data.detail || 'Failed to disconnect', 'error');
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') showAlert('Network error', 'error');
+      }
+    }
+
+    async function syncConnector(id) {
+      showAlert('Syncing... this may take a moment.', 'info');
+
+      try {
+        const res = await apiCall(`/api/v1/client/connectors/${id}/sync`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert(data.message, 'success');
+          loadApps();
+          loadJobs();
+          loadKnowledge();
+        } else {
+          showAlert(data.detail?.message || data.detail || 'Sync failed', 'error');
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') showAlert('Network error', 'error');
+      }
+    }
+
+    function handleOAuthReturn() {
+      const params = new URLSearchParams(window.location.search);
+      const success = params.get('oauth_success');
+      const error = params.get('oauth_error');
+
+      if (success) {
+        showToast(`Successfully connected ${success.replace(/_/g, ' ')}!`, 'success');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (error) {
+        showToast(`Connection failed: ${error.replace(/_/g, ' ')}`, 'error');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    // --- File upload ---
+    let selectedFile = null;
+
+    const FILE_CATEGORY_ICONS = {
+      document: '\u{1F4C4}',
+      image: '\u{1F5BC}',
+      audio: '\u{1F3B5}',
+      video: '\u{1F3AC}',
+    };
+
+    const FILE_CATEGORIES = {
+      '.pdf': 'document', '.docx': 'document', '.pptx': 'document', '.xlsx': 'document',
+      '.csv': 'document', '.txt': 'document', '.md': 'document', '.json': 'document',
+      '.jpg': 'image', '.jpeg': 'image', '.png': 'image', '.gif': 'image',
+      '.webp': 'image', '.bmp': 'image', '.tiff': 'image',
+      '.mp3': 'audio', '.wav': 'audio', '.m4a': 'audio', '.ogg': 'audio',
+      '.flac': 'audio', '.webm': 'audio',
+      '.mp4': 'video', '.mov': 'video',
+    };
+
+    function getFileCategory(filename) {
+      const ext = '.' + filename.split('.').pop().toLowerCase();
+      return FILE_CATEGORIES[ext] || null;
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showFilePreview(file) {
+      const category = getFileCategory(file.name);
+      if (!category) {
+        showAlert('Unsupported file type', 'error');
+        return;
+      }
+
+      const preview = document.getElementById('filePreview');
+      preview.classList.remove('hidden');
+      preview.innerHTML = `
+        <div class="file-preview">
+          <div class="file-preview-icon ${category}">${FILE_CATEGORY_ICONS[category]}</div>
+          <div class="file-preview-info">
+            <div class="file-preview-name">${file.name}</div>
+            <div class="file-preview-meta">
+              <span>${formatFileSize(file.size)}</span>
+              <span class="file-category-badge ${category}">${category}</span>
+            </div>
+          </div>
+          <button class="file-preview-remove" onclick="clearFileSelection()" title="Remove">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      `;
+      document.getElementById('uploadFileBtn').disabled = false;
+    }
+
+    function clearFileSelection() {
+      selectedFile = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('filePreview').classList.add('hidden');
+      document.getElementById('filePreview').innerHTML = '';
+      document.getElementById('uploadFileBtn').disabled = true;
+    }
+
+    // Drop zone events
+    (function setupDropZone() {
+      const dropZone = document.getElementById('fileDropZone');
+      const fileInput = document.getElementById('fileInput');
+      if (!dropZone || !fileInput) return;
+
+      dropZone.addEventListener('click', () => fileInput.click());
+
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) {
+          selectedFile = e.dataTransfer.files[0];
+          showFilePreview(selectedFile);
         }
       });
 
-      if (tab === 'url') {
-        document.getElementById('ingestUrlForm').classList.remove('hidden');
-        document.getElementById('ingestTextForm').classList.add('hidden');
-      } else {
-        document.getElementById('ingestUrlForm').classList.add('hidden');
-        document.getElementById('ingestTextForm').classList.remove('hidden');
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+          selectedFile = fileInput.files[0];
+          showFilePreview(selectedFile);
+        }
+      });
+    })();
+
+    async function uploadFile() {
+      if (!selectedFile) return;
+
+      const btn = document.getElementById('uploadFileBtn');
+      btn.disabled = true;
+      btn.textContent = 'Uploading...';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const res = await apiCall('/api/v1/client/ingest/file', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          showAlert(data.message, 'success');
+          clearFileSelection();
+          loadJobs();
+        } else {
+          showAlert(data.detail?.message || data.detail || 'Upload failed', 'error');
+        }
+      } catch (err) {
+        if (err.message !== 'Session expired') {
+          showAlert('Network error', 'error');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Upload File';
       }
     }
 
