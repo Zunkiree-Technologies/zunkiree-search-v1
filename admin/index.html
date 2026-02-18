@@ -215,6 +215,45 @@
     .hidden {
       display: none !important;
     }
+    /* Tenant Overview */
+    .tenant-section {
+      margin-bottom: 32px;
+    }
+    .tenant-selector {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .tenant-selector select {
+      max-width: 320px;
+    }
+    .tenant-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111827;
+    }
+    .stat-value.small {
+      font-size: 1rem;
+    }
     .embed-code {
       background: #1f2937;
       color: #e5e7eb;
@@ -244,6 +283,47 @@
 
   <div class="container" id="adminContainer" style="display:none;">
     <div id="alerts"></div>
+
+    <!-- Tenant Overview -->
+    <div class="tenant-section">
+      <div class="card">
+        <h2>Tenant Overview</h2>
+        <div class="tenant-selector">
+          <select id="tenantSelect" onchange="onTenantSelected()">
+            <option value="">Select a tenant...</option>
+          </select>
+          <button onclick="loadTenants()" class="secondary" style="white-space:nowrap;">Refresh</button>
+        </div>
+        <div id="tenantOverview" class="hidden">
+          <div class="tenant-overview">
+            <div class="stat-card">
+              <div class="stat-label">Site ID</div>
+              <div class="stat-value small" id="ovSiteId">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Brand Name</div>
+              <div class="stat-value small" id="ovBrandName">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Chunks</div>
+              <div class="stat-value" id="ovChunks">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Jobs</div>
+              <div class="stat-value" id="ovJobs">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Last Ingestion</div>
+              <div class="stat-value small" id="ovLastIngestion">—</div>
+            </div>
+          </div>
+          <div style="margin-top: 16px;">
+            <h3 style="font-size: 14px; color: #374151; margin-bottom: 10px;">Recent Jobs</h3>
+            <div id="tenantJobsList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="grid">
       <!-- Create Customer -->
@@ -602,6 +682,94 @@
       }
     }
 
+    // --- Tenant Overview ---
+    async function loadTenants() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/admin/customers`, {
+          headers: { 'X-Admin-Key': ADMIN_KEY },
+        });
+        const data = await res.json();
+        if (!res.ok) return;
+
+        const sel = document.getElementById('tenantSelect');
+        const current = sel.value;
+        sel.innerHTML = '<option value="">Select a tenant...</option>';
+        data.customers.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.site_id;
+          opt.textContent = `${c.name} (${c.site_id})`;
+          sel.appendChild(opt);
+        });
+        if (current) sel.value = current;
+      } catch {
+        // silent
+      }
+    }
+
+    async function onTenantSelected() {
+      const siteId = document.getElementById('tenantSelect').value;
+      const overview = document.getElementById('tenantOverview');
+
+      if (!siteId) {
+        overview.classList.add('hidden');
+        return;
+      }
+
+      overview.classList.remove('hidden');
+      document.getElementById('ovSiteId').textContent = siteId;
+      document.getElementById('ovBrandName').textContent = '...';
+      document.getElementById('ovChunks').textContent = '...';
+      document.getElementById('ovJobs').textContent = '...';
+      document.getElementById('ovLastIngestion').textContent = '...';
+      document.getElementById('tenantJobsList').innerHTML = '';
+
+      try {
+        // Fetch stats and jobs in parallel
+        const [statsRes, jobsRes] = await Promise.all([
+          fetch(`${API_URL}/api/v1/admin/stats/${siteId}`, {
+            headers: { 'X-Admin-Key': ADMIN_KEY },
+          }),
+          fetch(`${API_URL}/api/v1/admin/jobs/${siteId}`, {
+            headers: { 'X-Admin-Key': ADMIN_KEY },
+          }),
+        ]);
+
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          document.getElementById('ovBrandName').textContent = stats.brand_name;
+          document.getElementById('ovChunks').textContent = stats.total_chunks;
+          document.getElementById('ovJobs').textContent = stats.total_jobs;
+          document.getElementById('ovLastIngestion').textContent = stats.last_ingestion_date
+            ? new Date(stats.last_ingestion_date).toLocaleDateString()
+            : 'Never';
+        } else {
+          showAlert('Failed to load tenant stats', 'error');
+        }
+
+        if (jobsRes.ok) {
+          const jobsData = await jobsRes.json();
+          const list = document.getElementById('tenantJobsList');
+          if (jobsData.jobs.length === 0) {
+            list.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 12px;">No jobs found</p>';
+          } else {
+            list.innerHTML = jobsData.jobs.slice(0, 10).map(job => `
+              <div class="job-item">
+                <div class="job-header">
+                  <span>${job.source_type}: ${job.source_url || job.source_filename || 'N/A'}</span>
+                  <span class="job-status ${job.status}">${job.status}</span>
+                </div>
+                <div class="job-details">
+                  Chunks: ${job.chunks_created} | Created: ${new Date(job.created_at).toLocaleString()}
+                </div>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        showAlert('Failed to load tenant data', 'error');
+      }
+    }
+
     // Tab switching
     function showIngestTab(tab) {
       document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
@@ -658,7 +826,7 @@
     }
 
     // Initialize
-    verifyAdminKey();
+    verifyAdminKey().then(() => loadTenants());
     checkApiStatus();
     setInterval(checkApiStatus, 30000);
   </script>

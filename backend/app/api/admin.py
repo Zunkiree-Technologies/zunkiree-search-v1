@@ -3,10 +3,10 @@ import secrets
 from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.database import get_db
-from app.models import Customer, Domain, WidgetConfig, IngestionJob
+from app.models import Customer, Domain, WidgetConfig, IngestionJob, DocumentChunk
 from app.services.ingestion import get_ingestion_service
 from app.config import get_settings
 
@@ -90,6 +90,26 @@ class JobsListResponse(BaseModel):
     total: int
 
 
+class CustomerInfo(BaseModel):
+    id: str
+    name: str
+    site_id: str
+    is_active: bool
+    created_at: str
+
+
+class CustomersListResponse(BaseModel):
+    customers: list[CustomerInfo]
+
+
+class TenantStatsResponse(BaseModel):
+    site_id: str
+    brand_name: str
+    total_chunks: int
+    total_jobs: int
+    last_ingestion_date: str | None
+
+
 # Endpoints
 @router.post("/customers", response_model=CreateCustomerResponse)
 async def create_customer(
@@ -142,6 +162,84 @@ async def create_customer(
         site_id=customer.site_id,
         api_key=api_key,
         message="Customer created successfully",
+    )
+
+
+@router.get("/customers", response_model=CustomersListResponse)
+async def list_customers(
+    db: AsyncSession = Depends(get_db),
+    _: str = Depends(verify_admin_key),
+):
+    """List all customers."""
+    result = await db.execute(
+        select(Customer).order_by(Customer.created_at.desc())
+    )
+    customers = result.scalars().all()
+
+    return CustomersListResponse(
+        customers=[
+            CustomerInfo(
+                id=str(c.id),
+                name=c.name,
+                site_id=c.site_id,
+                is_active=c.is_active,
+                created_at=c.created_at.isoformat(),
+            )
+            for c in customers
+        ]
+    )
+
+
+@router.get("/stats/{site_id}", response_model=TenantStatsResponse)
+async def get_tenant_stats(
+    site_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: str = Depends(verify_admin_key),
+):
+    """Get ingestion stats for a tenant."""
+    result = await db.execute(
+        select(Customer).where(Customer.site_id == site_id)
+    )
+    customer = result.scalar_one_or_none()
+
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "CUSTOMER_NOT_FOUND", "message": "Customer not found"},
+        )
+
+    # Total chunks
+    chunk_count = await db.execute(
+        select(func.count()).select_from(DocumentChunk).where(
+            DocumentChunk.customer_id == customer.id
+        )
+    )
+    total_chunks = chunk_count.scalar() or 0
+
+    # Total jobs + last ingestion date
+    job_stats = await db.execute(
+        select(
+            func.count(),
+            func.max(IngestionJob.completed_at),
+        ).where(IngestionJob.customer_id == customer.id)
+    )
+    row = job_stats.one()
+    total_jobs = row[0] or 0
+    last_ingestion = row[1]
+
+    # Brand name from config
+    config_result = await db.execute(
+        select(WidgetConfig).where(WidgetConfig.customer_id == customer.id)
+    )
+    config = config_result.scalar_one_or_none()
+    brand_name = config.brand_name if config else customer.name
+
+    return TenantStatsResponse(
+        site_id=site_id,
+        brand_name=brand_name,
+        total_chunks=total_chunks,
+        total_jobs=total_jobs,
+        last_ingestion_date=last_ingestion.isoformat() if last_ingestion else None,
     )
 
 
