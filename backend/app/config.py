@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     # Query settings
     max_query_length: int = 500
     top_k_chunks: int = 5
+    confidence_threshold: float = 0.25
 
     # LLM Configuration
     llm_provider: str = "openai"  # Future: anthropic, azure, etc.

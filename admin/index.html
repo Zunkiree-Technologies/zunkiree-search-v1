@@ -294,6 +294,54 @@
     .qa-pair .remove-pair:hover {
       background: #dc2626;
     }
+    /* Retrieval Health */
+    .retrieval-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .metric-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111827;
+    }
+    .metric-value.warn {
+      color: #f59e0b;
+    }
+    .metric-value.bad {
+      color: #ef4444;
+    }
+    .metric-value.good {
+      color: #10b981;
+    }
+    .mode-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .mode-chip {
+      display: inline-block;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #e5e7eb;
+      color: #374151;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -346,6 +394,43 @@
             <h3 style="font-size: 14px; color: #374151; margin-bottom: 10px;">Recent Jobs</h3>
             <div id="tenantJobsList"></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retrieval Health -->
+    <div class="tenant-section" id="retrievalSection" style="display:none;">
+      <div class="card">
+        <h2>Retrieval Health <span style="font-size:12px; color:#6b7280; font-weight:400;">(last 7 days)</span></h2>
+        <div class="retrieval-grid">
+          <div class="metric-card">
+            <div class="metric-label">Total Queries</div>
+            <div class="metric-value" id="rhTotal">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Fallback Rate</div>
+            <div class="metric-value" id="rhFallback">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Avg Top Score</div>
+            <div class="metric-value" id="rhTopScore">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Avg Response Time</div>
+            <div class="metric-value" id="rhResponseTime">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Threshold Guard Rate</div>
+            <div class="metric-value" id="rhThreshold">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Avg Context Tokens</div>
+            <div class="metric-value" id="rhContextTokens">—</div>
+          </div>
+        </div>
+        <div>
+          <div class="metric-label" style="margin-bottom:8px;">Retrieval Mode Breakdown</div>
+          <div class="mode-bar" id="rhModeBreakdown">—</div>
         </div>
       </div>
     </div>
@@ -459,6 +544,11 @@
           <div class="form-group">
             <label>Welcome Message</label>
             <input type="text" id="welcomeMessage" placeholder="Hi! How can I help you?">
+          </div>
+          <div class="form-group">
+            <label>Confidence Threshold (0.1–0.5)</label>
+            <input type="number" id="confidenceThreshold" min="0.1" max="0.5" step="0.05" placeholder="0.25">
+            <span style="font-size:12px; color:#6b7280;">Queries below this score skip the LLM and return fallback.</span>
           </div>
           <button type="submit">Update Config</button>
         </form>
@@ -777,10 +867,13 @@
       const primaryColor = document.getElementById('primaryColor').value;
       const welcomeMessage = document.getElementById('welcomeMessage').value;
 
+      const confidenceThreshold = document.getElementById('confidenceThreshold').value;
+
       if (brandName) body.brand_name = brandName;
       if (tone) body.tone = tone;
       if (primaryColor) body.primary_color = primaryColor;
       if (welcomeMessage) body.welcome_message = welcomeMessage;
+      if (confidenceThreshold) body.confidence_threshold = parseFloat(confidenceThreshold);
 
       try {
         const res = await fetch(`${API_URL}/api/v1/admin/config/${customerId}`, {
@@ -874,11 +967,13 @@
 
       if (!siteId) {
         overview.classList.add('hidden');
+        document.getElementById('retrievalSection').style.display = 'none';
         return;
       }
 
       overview.classList.remove('hidden');
       syncSiteIdFields();
+      loadRetrievalStats(siteId);
       document.getElementById('ovSiteId').textContent = siteId;
       document.getElementById('ovBrandName').textContent = '...';
       document.getElementById('ovChunks').textContent = '...';
@@ -930,6 +1025,59 @@
         }
       } catch (err) {
         showAlert('Failed to load tenant data', 'error');
+      }
+    }
+
+    // --- Retrieval Health ---
+    async function loadRetrievalStats(siteId) {
+      const section = document.getElementById('retrievalSection');
+      if (!siteId) { section.style.display = 'none'; return; }
+      section.style.display = '';
+
+      // Reset
+      ['rhTotal','rhFallback','rhTopScore','rhResponseTime','rhThreshold','rhContextTokens'].forEach(id => {
+        document.getElementById(id).textContent = '...';
+        document.getElementById(id).className = 'metric-value';
+      });
+      document.getElementById('rhModeBreakdown').innerHTML = '...';
+
+      try {
+        const res = await fetch(`${API_URL}/api/v1/admin/retrieval-stats/${siteId}`, {
+          headers: { 'X-Admin-Key': ADMIN_KEY },
+        });
+        if (!res.ok) return;
+        const d = await res.json();
+
+        document.getElementById('rhTotal').textContent = d.total_queries;
+
+        const fbEl = document.getElementById('rhFallback');
+        fbEl.textContent = d.fallback_rate + '%';
+        fbEl.className = 'metric-value ' + (d.fallback_rate > 50 ? 'bad' : d.fallback_rate > 25 ? 'warn' : 'good');
+
+        const tsEl = document.getElementById('rhTopScore');
+        tsEl.textContent = d.avg_top_score != null ? d.avg_top_score.toFixed(3) : '—';
+        if (d.avg_top_score != null) {
+          tsEl.className = 'metric-value ' + (d.avg_top_score < 0.25 ? 'bad' : d.avg_top_score < 0.4 ? 'warn' : 'good');
+        }
+
+        document.getElementById('rhResponseTime').textContent = d.avg_response_time != null ? Math.round(d.avg_response_time) + 'ms' : '—';
+
+        const tgEl = document.getElementById('rhThreshold');
+        tgEl.textContent = d.threshold_guard_rate + '%';
+        tgEl.className = 'metric-value ' + (d.threshold_guard_rate > 40 ? 'warn' : 'good');
+
+        document.getElementById('rhContextTokens').textContent = d.avg_context_tokens != null ? Math.round(d.avg_context_tokens) : '—';
+
+        const modeBar = document.getElementById('rhModeBreakdown');
+        if (d.mode_breakdown.length === 0) {
+          modeBar.innerHTML = '<span style="color:#6b7280;">No data</span>';
+        } else {
+          modeBar.innerHTML = d.mode_breakdown.map(m =>
+            `<span class="mode-chip">${m.mode}: ${m.count}</span>`
+          ).join('');
+        }
+      } catch {
+        // silent
       }
     }
 

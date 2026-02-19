@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, DateTime, ForeignKey, Integer, Text
+from sqlalchemy import Boolean, Float, String, DateTime, ForeignKey, Integer, Text
+from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -24,6 +25,12 @@ class QueryLog(Base):
     origin_domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
     ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    top_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    avg_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    fallback_triggered: Mapped[bool] = mapped_column(Boolean, default=False)
+    retrieval_mode: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    context_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    confidence_threshold: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
     # Relationships

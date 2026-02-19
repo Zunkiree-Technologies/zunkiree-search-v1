@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Integer, Text, ARRAY
+from sqlalchemy import Float, String, Boolean, DateTime, ForeignKey, Integer, Text, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -31,6 +31,7 @@ class WidgetConfig(Base):
     show_sources: Mapped[bool] = mapped_column(Boolean, default=True)
     show_suggestions: Mapped[bool] = mapped_column(Boolean, default=True)
     quick_actions: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON string of suggestion strings
+    confidence_threshold: Mapped[float] = mapped_column(Float, default=0.25)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

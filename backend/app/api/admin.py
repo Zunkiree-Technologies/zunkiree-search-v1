@@ -3,10 +3,10 @@ import secrets
 from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import Integer, select, func, case
 
 from app.database import get_db
-from app.models import Customer, Domain, WidgetConfig, IngestionJob, DocumentChunk
+from app.models import Customer, Domain, WidgetConfig, IngestionJob, DocumentChunk, QueryLog
 from app.services.ingestion import get_ingestion_service
 from app.config import get_settings
 
@@ -96,6 +96,7 @@ class UpdateConfigRequest(BaseModel):
     fallback_message: str | None = None
     show_sources: bool | None = None
     show_suggestions: bool | None = None
+    confidence_threshold: float | None = Field(None, ge=0.1, le=0.5)
 
 
 class JobInfo(BaseModel):
@@ -132,6 +133,21 @@ class TenantStatsResponse(BaseModel):
     total_chunks: int
     total_jobs: int
     last_ingestion_date: str | None
+
+
+class ModeCount(BaseModel):
+    mode: str
+    count: int
+
+
+class RetrievalStatsResponse(BaseModel):
+    total_queries: int
+    fallback_rate: float
+    avg_top_score: float | None
+    avg_response_time: float | None
+    threshold_guard_rate: float
+    avg_context_tokens: float | None
+    mode_breakdown: list[ModeCount]
 
 
 # Endpoints
@@ -264,6 +280,81 @@ async def get_tenant_stats(
         total_chunks=total_chunks,
         total_jobs=total_jobs,
         last_ingestion_date=last_ingestion.isoformat() if last_ingestion else None,
+    )
+
+
+@router.get("/retrieval-stats/{site_id}", response_model=RetrievalStatsResponse)
+async def get_retrieval_stats(
+    site_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: str = Depends(verify_admin_key),
+):
+    """Get retrieval health metrics for a tenant (last 7 days)."""
+    result = await db.execute(
+        select(Customer).where(Customer.site_id == site_id)
+    )
+    customer = result.scalar_one_or_none()
+
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "CUSTOMER_NOT_FOUND", "message": "Customer not found"},
+        )
+
+    from datetime import datetime, timedelta
+    since = datetime.utcnow() - timedelta(days=7)
+
+    # Single aggregation query for all scalar metrics
+    agg = await db.execute(
+        select(
+            func.count().label("total"),
+            func.sum(case((QueryLog.fallback_triggered == True, 1), else_=0)).label("fallback_count"),
+            func.avg(QueryLog.top_score).label("avg_top_score"),
+            func.avg(QueryLog.response_time_ms).label("avg_response_time"),
+            func.avg(QueryLog.context_tokens).label("avg_context_tokens"),
+        ).where(
+            QueryLog.customer_id == customer.id,
+            QueryLog.created_at >= since,
+        )
+    )
+    row = agg.one()
+    total = row.total or 0
+    fallback_count = int(row.fallback_count or 0)
+    avg_top = round(float(row.avg_top_score), 3) if row.avg_top_score is not None else None
+    avg_rt = round(float(row.avg_response_time), 0) if row.avg_response_time is not None else None
+    avg_ctx = round(float(row.avg_context_tokens), 0) if row.avg_context_tokens is not None else None
+
+    # Threshold guard count (retrieval_mode = 'hybrid_threshold')
+    tg = await db.execute(
+        select(func.count()).select_from(QueryLog).where(
+            QueryLog.customer_id == customer.id,
+            QueryLog.created_at >= since,
+            QueryLog.retrieval_mode == "hybrid_threshold",
+        )
+    )
+    threshold_count = tg.scalar() or 0
+
+    # Mode breakdown
+    modes = await db.execute(
+        select(
+            QueryLog.retrieval_mode,
+            func.count().label("cnt"),
+        ).where(
+            QueryLog.customer_id == customer.id,
+            QueryLog.created_at >= since,
+            QueryLog.retrieval_mode.isnot(None),
+        ).group_by(QueryLog.retrieval_mode)
+    )
+    mode_breakdown = [ModeCount(mode=r[0], count=r[1]) for r in modes.fetchall()]
+
+    return RetrievalStatsResponse(
+        total_queries=total,
+        fallback_rate=round((fallback_count / total) * 100, 1) if total > 0 else 0,
+        avg_top_score=avg_top,
+        avg_response_time=avg_rt,
+        threshold_guard_rate=round((threshold_count / total) * 100, 1) if total > 0 else 0,
+        avg_context_tokens=avg_ctx,
+        mode_breakdown=mode_breakdown,
     )
 
 

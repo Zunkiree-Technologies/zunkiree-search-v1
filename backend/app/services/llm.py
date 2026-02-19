@@ -152,6 +152,7 @@ class LLMService:
             return {
                 "answer": fallback_message,
                 "suggestions": [],
+                "context_tokens": 0,
             }
 
         # Build system prompt
@@ -178,6 +179,7 @@ class LLMService:
         return {
             "answer": answer,
             "suggestions": suggestions,
+            "context_tokens": running_tokens,
         }
 
     async def _generate_suggestions(

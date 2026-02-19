@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +6,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import init_db
 from app.api import query_router, widget_router, admin_router
+
+# --- Logging configuration (before anything else) ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+)
+# Silence noisy third-party libraries
+for _lib in ("httpx", "httpcore", "openai", "pinecone", "pinecone_plugin_interface"):
+    logging.getLogger(_lib).setLevel(logging.WARNING)
 
 settings = get_settings()
 
