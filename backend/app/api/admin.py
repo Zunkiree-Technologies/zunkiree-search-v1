@@ -143,11 +143,15 @@ class ModeCount(BaseModel):
 class RetrievalStatsResponse(BaseModel):
     total_queries: int
     fallback_rate: float
+    blocked_rate: float
+    llm_decline_rate: float
+    retrieval_empty_rate: float
     avg_top_score: float | None
     avg_response_time: float | None
     threshold_guard_rate: float
     avg_context_tokens: float | None
     mode_breakdown: list[ModeCount]
+    health_score: float
 
 
 # Endpoints
@@ -304,11 +308,14 @@ async def get_retrieval_stats(
     from datetime import datetime, timedelta
     since = datetime.utcnow() - timedelta(days=7)
 
-    # Single aggregation query for all scalar metrics
+    # Single aggregation query for all scalar metrics + fallback breakdown
     agg = await db.execute(
         select(
             func.count().label("total"),
             func.sum(case((QueryLog.fallback_triggered == True, 1), else_=0)).label("fallback_count"),
+            func.sum(case((QueryLog.retrieval_blocked == True, 1), else_=0)).label("blocked_count"),
+            func.sum(case((QueryLog.llm_declined == True, 1), else_=0)).label("llm_decline_count"),
+            func.sum(case((QueryLog.retrieval_empty == True, 1), else_=0)).label("empty_count"),
             func.avg(QueryLog.top_score).label("avg_top_score"),
             func.avg(QueryLog.response_time_ms).label("avg_response_time"),
             func.avg(QueryLog.context_tokens).label("avg_context_tokens"),
@@ -320,6 +327,9 @@ async def get_retrieval_stats(
     row = agg.one()
     total = row.total or 0
     fallback_count = int(row.fallback_count or 0)
+    blocked_count = int(row.blocked_count or 0)
+    llm_decline_count = int(row.llm_decline_count or 0)
+    empty_count = int(row.empty_count or 0)
     avg_top = round(float(row.avg_top_score), 3) if row.avg_top_score is not None else None
     avg_rt = round(float(row.avg_response_time), 0) if row.avg_response_time is not None else None
     avg_ctx = round(float(row.avg_context_tokens), 0) if row.avg_context_tokens is not None else None
@@ -347,14 +357,35 @@ async def get_retrieval_stats(
     )
     mode_breakdown = [ModeCount(mode=r[0], count=r[1]) for r in modes.fetchall()]
 
+    # Compute rates for return + health score
+    fallback_rate = round((fallback_count / total) * 100, 1) if total > 0 else 0.0
+    blocked_rate = round((blocked_count / total) * 100, 1) if total > 0 else 0.0
+    llm_decline_rate = round((llm_decline_count / total) * 100, 1) if total > 0 else 0.0
+    retrieval_empty_rate = round((empty_count / total) * 100, 1) if total > 0 else 0.0
+    threshold_guard_rate = round((threshold_count / total) * 100, 1) if total > 0 else 0.0
+
+    # Health score (0–100)
+    if total == 0:
+        health_score = 0.0
+    else:
+        fallback_component = (1 - fallback_rate / 100) * 40
+        score_component = min((avg_top or 0) / 0.7, 1.0) * 30
+        threshold_component = (1 - threshold_guard_rate / 100) * 20
+        context_component = min((avg_ctx or 0) / 800, 1.0) * 10
+        health_score = round(fallback_component + score_component + threshold_component + context_component, 1)
+
     return RetrievalStatsResponse(
         total_queries=total,
-        fallback_rate=round((fallback_count / total) * 100, 1) if total > 0 else 0,
+        fallback_rate=fallback_rate,
+        blocked_rate=blocked_rate,
+        llm_decline_rate=llm_decline_rate,
+        retrieval_empty_rate=retrieval_empty_rate,
         avg_top_score=avg_top,
         avg_response_time=avg_rt,
-        threshold_guard_rate=round((threshold_count / total) * 100, 1) if total > 0 else 0,
+        threshold_guard_rate=threshold_guard_rate,
         avg_context_tokens=avg_ctx,
         mode_breakdown=mode_breakdown,
+        health_score=health_score,
     )
 
 

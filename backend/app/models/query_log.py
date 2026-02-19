@@ -31,6 +31,10 @@ class QueryLog(Base):
     retrieval_mode: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     context_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     confidence_threshold: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    rerank_triggered: Mapped[bool] = mapped_column(Boolean, default=False)
+    retrieval_blocked: Mapped[bool] = mapped_column(Boolean, default=False)
+    llm_declined: Mapped[bool] = mapped_column(Boolean, default=False)
+    retrieval_empty: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
     # Relationships

@@ -342,6 +342,52 @@
       color: #374151;
       font-weight: 500;
     }
+    .health-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+    .health-circle {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      flex-shrink: 0;
+    }
+    .health-circle svg {
+      transform: rotate(-90deg);
+    }
+    .health-circle .track {
+      fill: none;
+      stroke: #e5e7eb;
+      stroke-width: 8;
+    }
+    .health-circle .fill {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.6s ease, stroke 0.3s;
+    }
+    .health-number {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+    .health-detail {
+      flex: 1;
+    }
+    .health-detail .metric-label {
+      margin-bottom: 4px;
+    }
+    .health-breakdown {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -402,6 +448,20 @@
     <div class="tenant-section" id="retrievalSection" style="display:none;">
       <div class="card">
         <h2>Retrieval Health <span style="font-size:12px; color:#6b7280; font-weight:400;">(last 7 days)</span></h2>
+        <div class="health-row">
+          <div class="health-circle">
+            <svg viewBox="0 0 100 100">
+              <circle class="track" cx="50" cy="50" r="42"/>
+              <circle class="fill" id="rhArc" cx="50" cy="50" r="42"
+                stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
+            </svg>
+            <div class="health-number" id="rhScore">—</div>
+          </div>
+          <div class="health-detail">
+            <div class="metric-label">Health Score</div>
+            <div class="health-breakdown" id="rhBreakdown">Computed from fallback rate, retrieval quality, threshold guard rate, and context utilization.</div>
+          </div>
+        </div>
         <div class="retrieval-grid">
           <div class="metric-card">
             <div class="metric-label">Total Queries</div>
@@ -1040,6 +1100,10 @@
         document.getElementById(id).className = 'metric-value';
       });
       document.getElementById('rhModeBreakdown').innerHTML = '...';
+      document.getElementById('rhScore').textContent = '...';
+      document.getElementById('rhScore').style.color = '#6b7280';
+      document.getElementById('rhArc').style.strokeDashoffset = '263.9';
+      document.getElementById('rhBreakdown').textContent = 'Loading...';
 
       try {
         const res = await fetch(`${API_URL}/api/v1/admin/retrieval-stats/${siteId}`, {
@@ -1076,6 +1140,28 @@
             `<span class="mode-chip">${m.mode}: ${m.count}</span>`
           ).join('');
         }
+
+        // Health score circle
+        const hs = d.health_score;
+        const color = hs >= 85 ? '#10b981' : hs >= 60 ? '#f59e0b' : '#ef4444';
+        const circumference = 263.9;
+        const offset = circumference - (circumference * Math.min(hs, 100) / 100);
+
+        const scoreEl = document.getElementById('rhScore');
+        scoreEl.textContent = hs;
+        scoreEl.style.color = color;
+
+        const arc = document.getElementById('rhArc');
+        arc.style.stroke = color;
+        arc.style.strokeDashoffset = offset;
+
+        // Breakdown text
+        const fb = (1 - d.fallback_rate / 100) * 40;
+        const sc = Math.min((d.avg_top_score || 0) / 0.7, 1.0) * 30;
+        const tg = (1 - d.threshold_guard_rate / 100) * 20;
+        const ct = Math.min((d.avg_context_tokens || 0) / 800, 1.0) * 10;
+        document.getElementById('rhBreakdown').innerHTML =
+          `Fallback: ${fb.toFixed(1)}/40 &middot; Score quality: ${sc.toFixed(1)}/30 &middot; Threshold: ${tg.toFixed(1)}/20 &middot; Context: ${ct.toFixed(1)}/10`;
       } catch {
         // silent
       }

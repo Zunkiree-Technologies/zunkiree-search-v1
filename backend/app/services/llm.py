@@ -1,7 +1,10 @@
+import logging
 from abc import ABC, abstractmethod
 from openai import AsyncOpenAI
 from app.config import get_settings
 from app.utils.chunking import count_tokens
+
+logger = logging.getLogger("zunkiree.llm.service")
 
 settings = get_settings()
 
@@ -213,6 +216,76 @@ class LLMService:
             return suggestions[:2]  # Limit to 2 suggestions
         except Exception:
             return []
+
+    async def rerank_chunks(
+        self,
+        question: str,
+        chunks: list[dict],
+        top_n: int = 5,
+    ) -> list[dict]:
+        """
+        Use LLM to rerank chunks by relevance to the question.
+        Called only for ambiguous queries (0.25 < top_score < 0.45).
+
+        Args:
+            question: User's question
+            chunks: List of chunk dicts with 'content' key
+            top_n: Number of top chunks to return after reranking
+
+        Returns:
+            Reranked list of chunk dicts, trimmed to top_n
+        """
+        if len(chunks) <= 1:
+            return chunks[:top_n]
+
+        # Build numbered passage list (truncate each to ~400 chars for cost efficiency)
+        passages = []
+        for i, chunk in enumerate(chunks, 1):
+            content = chunk.get("content", "")[:400]
+            passages.append(f"Passage {i}: {content}")
+
+        passages_text = "\n\n".join(passages)
+
+        try:
+            response = await self.provider.generate(
+                system_prompt=(
+                    "You are a relevance ranking assistant. "
+                    "Given a question and numbered passages, return ONLY the passage numbers "
+                    "ordered by relevance to the question, most relevant first. "
+                    "Format: comma-separated numbers, e.g. 3,1,5,2,4"
+                ),
+                user_message=(
+                    f"Question: {question}\n\n{passages_text}\n\n"
+                    "Ranking (most relevant first):"
+                ),
+                max_tokens=50,
+                temperature=0.0,
+            )
+
+            # Parse ranking response
+            ranking = [int(x.strip()) for x in response.split(",") if x.strip().isdigit()]
+
+            reranked = []
+            seen = set()
+            for idx in ranking:
+                if 1 <= idx <= len(chunks) and idx not in seen:
+                    reranked.append(chunks[idx - 1])
+                    seen.add(idx)
+
+            # Append any missing chunks at the end (fallback for incomplete rankings)
+            for i, chunk in enumerate(chunks):
+                if (i + 1) not in seen:
+                    reranked.append(chunk)
+
+            logger.info(
+                "[RERANK] input_chunks=%d output_chunks=%d ranking=%s",
+                len(chunks), min(top_n, len(reranked)), ranking[:top_n],
+            )
+            return reranked[:top_n]
+
+        except Exception as e:
+            logger.warning("[RERANK] Failed, returning original order: %s", e)
+            return chunks[:top_n]
 
 
 # =============================================================================

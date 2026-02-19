@@ -63,16 +63,18 @@ class QueryService:
         # Generate query embedding
         query_embedding = await self.embedding_service.create_embedding(question)
 
-        # [TEMP-LOG] Log Pinecone query params
-        logger.warning("[QUERY-TRACE] pinecone_namespace=%s site_id_filter=%s top_k=%s embedding_dim=%d", site_id, site_id, settings.top_k_chunks, len(query_embedding))
-
         # --- Hybrid retrieval: vector + keyword ---
+        # Phase 4A: Fetch wider candidate set (8) for adaptive top_k and potential reranking
+        initial_fetch_k = 8
 
-        # List A: Pinecone vector search
+        # [TEMP-LOG] Log Pinecone query params
+        logger.warning("[QUERY-TRACE] pinecone_namespace=%s site_id_filter=%s initial_fetch_k=%s embedding_dim=%d", site_id, site_id, initial_fetch_k, len(query_embedding))
+
+        # List A: Pinecone vector search (wide fetch for adaptive layer)
         vector_matches = await self.vector_store.query_vectors(
             query_vector=query_embedding,
             namespace=site_id,
-            top_k=settings.top_k_chunks,
+            top_k=initial_fetch_k,
             site_id=site_id,
         )
         vector_ids = [match["id"] for match in vector_matches]
@@ -115,11 +117,12 @@ class QueryService:
                 retrieval_mode="hybrid_threshold",
                 context_tokens=0,
                 confidence_threshold=threshold,
+                retrieval_blocked=True,
             )
 
             logger.info(
-                "[RAG-METRICS] site_id=%s top_score=%.3f avg_score=%.3f fallback=%s mode=%s context_tokens=%s",
-                site_id, top_score, avg_score or 0, True, "hybrid_threshold", 0,
+                "[RAG-METRICS] site_id=%s top_score=%.3f avg_score=%.3f fallback=%s mode=%s blocked=%s llm_declined=%s empty=%s context_tokens=%s",
+                site_id, top_score, avg_score or 0, True, "hybrid_threshold", True, False, False, 0,
             )
 
             return {
@@ -128,12 +131,35 @@ class QueryService:
                 "sources": [],
             }
 
+        # --- Phase 4A: Adaptive top_k and reranking decisions ---
+        if top_score is not None and top_score > 0.6:
+            adaptive_top_k = 3
+        elif top_score is not None and top_score >= 0.4:
+            adaptive_top_k = 5
+        else:
+            adaptive_top_k = 8
+
+        # Reranking triggers only in the ambiguous zone
+        rerank_needed = (
+            top_score is not None
+            and top_score > threshold
+            and top_score < 0.45
+        )
+
+        # If reranking, fuse to 8 candidates first; otherwise fuse to adaptive_top_k
+        fusion_top_n = 8 if rerank_needed else adaptive_top_k
+
+        logger.info(
+            "[ADAPTIVE] site_id=%s top_score=%.3f adaptive_top_k=%d rerank_needed=%s fusion_top_n=%d",
+            site_id, top_score or 0, adaptive_top_k, rerank_needed, fusion_top_n,
+        )
+
         # List B: Postgres full-text keyword search
-        keyword_ids = await self._keyword_search(db, customer.id, question, limit=settings.top_k_chunks)
+        keyword_ids = await self._keyword_search(db, customer.id, question, limit=initial_fetch_k)
         logger.warning("[QUERY-TRACE] keyword_results_ids=%s", keyword_ids[:5])
 
         # Fuse results via Reciprocal Rank Fusion
-        fused_ids = _reciprocal_rank_fusion(vector_ids, keyword_ids, k=60, top_n=settings.top_k_chunks)
+        fused_ids = _reciprocal_rank_fusion(vector_ids, keyword_ids, k=60, top_n=fusion_top_n)
         logger.warning("[QUERY-TRACE] fused_results_ids=%s", fused_ids[:5])
 
         # No-data detection: if both searches returned 0 results, return fallback
@@ -158,11 +184,12 @@ class QueryService:
                 retrieval_mode="hybrid",
                 context_tokens=0,
                 confidence_threshold=threshold,
+                retrieval_empty=True,
             )
 
             logger.info(
-                "[RAG-METRICS] site_id=%s top_score=%.3f avg_score=%.3f fallback=%s mode=%s context_tokens=%s",
-                site_id, top_score or 0, avg_score or 0, True, "hybrid", 0,
+                "[RAG-METRICS] site_id=%s top_score=%.3f avg_score=%.3f fallback=%s mode=%s blocked=%s llm_declined=%s empty=%s context_tokens=%s",
+                site_id, top_score or 0, avg_score or 0, True, "hybrid", False, False, True, 0,
             )
 
             return {
@@ -193,6 +220,23 @@ class QueryService:
         # Sort by fusion rank (highest score = best rank)
         chunks_for_llm.sort(key=lambda c: c["score"], reverse=True)
 
+        # --- Phase 4A: Adaptive reranking for ambiguous queries ---
+        rerank_triggered = False
+        if rerank_needed and len(chunks_for_llm) > 1:
+            chunks_for_llm = await self.llm_service.rerank_chunks(
+                question=question,
+                chunks=chunks_for_llm,
+                top_n=5,
+            )
+            rerank_triggered = True
+            retrieval_mode = "hybrid_rerank"
+            logger.info(
+                "[ADAPTIVE] site_id=%s rerank_triggered=True chunks_after_rerank=%d",
+                site_id, len(chunks_for_llm),
+            )
+        else:
+            retrieval_mode = "hybrid"
+
         # Determine if suggestions should be generated
         show_suggestions = config.show_suggestions if config else True
 
@@ -210,14 +254,16 @@ class QueryService:
         # Calculate response time
         response_time_ms = int((time.time() - start_time) * 1000)
 
-        # Compute retrieval metrics
+        # Compute fallback breakdown
         fallback_message = config.fallback_message if config else "I don't have that information yet."
         context_tokens = result.get("context_tokens", 0)
-        fallback_triggered = (
-            not vector_matches
-            or result["answer"] == fallback_message
-            or context_tokens == 0
+
+        retrieval_empty_flag = not vector_matches
+        llm_declined = (
+            result["answer"] == fallback_message
+            and context_tokens > 0
         )
+        fallback_triggered = retrieval_empty_flag or llm_declined
 
         # Log query
         await self._log_query(
@@ -233,14 +279,17 @@ class QueryService:
             top_score=top_score,
             avg_score=avg_score,
             fallback_triggered=fallback_triggered,
-            retrieval_mode="hybrid",
+            retrieval_mode=retrieval_mode,
             context_tokens=context_tokens,
             confidence_threshold=threshold,
+            rerank_triggered=rerank_triggered,
+            retrieval_empty=retrieval_empty_flag,
+            llm_declined=llm_declined,
         )
 
         logger.info(
-            "[RAG-METRICS] site_id=%s top_score=%.3f avg_score=%.3f fallback=%s mode=%s context_tokens=%s",
-            site_id, top_score or 0, avg_score or 0, fallback_triggered, "hybrid", context_tokens,
+            "[RAG-METRICS] site_id=%s top_score=%.3f avg_score=%.3f fallback=%s mode=%s rerank=%s blocked=%s llm_declined=%s empty=%s context_tokens=%s",
+            site_id, top_score or 0, avg_score or 0, fallback_triggered, retrieval_mode, rerank_triggered, False, llm_declined, retrieval_empty_flag, context_tokens,
         )
 
         # Build deduplicated sources list
@@ -376,6 +425,10 @@ class QueryService:
         retrieval_mode: str | None = None,
         context_tokens: int | None = None,
         confidence_threshold: float | None = None,
+        rerank_triggered: bool = False,
+        retrieval_blocked: bool = False,
+        llm_declined: bool = False,
+        retrieval_empty: bool = False,
     ) -> None:
         """Log query to database."""
         ip_hash = None
@@ -397,6 +450,10 @@ class QueryService:
             retrieval_mode=retrieval_mode,
             context_tokens=context_tokens,
             confidence_threshold=confidence_threshold,
+            rerank_triggered=rerank_triggered,
+            retrieval_blocked=retrieval_blocked,
+            llm_declined=llm_declined,
+            retrieval_empty=retrieval_empty,
         )
         db.add(log)
         await db.commit()
