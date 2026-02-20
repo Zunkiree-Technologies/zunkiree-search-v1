@@ -364,15 +364,17 @@ async def get_retrieval_stats(
     retrieval_empty_rate = round((empty_count / total) * 100, 1) if total > 0 else 0.0
     threshold_guard_rate = round((threshold_count / total) * 100, 1) if total > 0 else 0.0
 
-    # Health score (0–100)
+    # Health score (0–100) — Phase 4F refined formula
     if total == 0:
         health_score = 0.0
     else:
-        fallback_component = (1 - fallback_rate / 100) * 40
         score_component = min((avg_top or 0) / 0.7, 1.0) * 30
-        threshold_component = (1 - threshold_guard_rate / 100) * 20
         context_component = min((avg_ctx or 0) / 800, 1.0) * 10
-        health_score = round(fallback_component + score_component + threshold_component + context_component, 1)
+        threshold_component = (1 - blocked_rate / 100) * 20
+        llm_penalty = (llm_decline_rate / 100) * 25
+        empty_penalty = (retrieval_empty_rate / 100) * 40
+        raw = score_component + context_component + threshold_component - llm_penalty - empty_penalty
+        health_score = round(max(0.0, min(100.0, raw)), 1)
 
     return RetrievalStatsResponse(
         total_queries=total,
